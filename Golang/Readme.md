@@ -285,3 +285,171 @@ func main(){
 	}
 }
 ```
+
+```golang
+if {}
+else if {}
+else {
+	if{}
+	if{}
+	.
+	.
+}
+```
+
+## Switch Statement
+
+```golang
+func main() {
+	switch 2 {
+	case 1:
+		fmt.Println("one")
+	case 2:
+		fmt.Println("two") 	// this will be executed
+	default:
+		fmt.Println("not one or two")
+	}
+}
+```
+
+- Support multiple conditions
+
+```golang
+func main() {
+	switch 5 {
+	case 1, 5, 10:
+		fmt.Println("one, five or ten")	// this will work
+	case 2:
+		fmt.Println("two")
+	default:
+		fmt.Println("not one or two")
+	}
+}
+```
+
+- Using an expression
+
+```golang
+func main() {
+	switch i := 2+3;i {
+	case 1, 5, 10:
+		fmt.Println("one, five or ten")	// this will work (2+3 = 5)
+	case 2:
+		fmt.Println("two")
+	default:
+		fmt.Println("not one or two")
+	}
+}
+```
+
+- Tagless syntax
+
+```golang
+func main() {
+	i := 10
+	switch {
+	case i <= 10:
+		fmt.Println("less than or equal to ten")	// this will work, because its seen first
+	case i<=20:
+		fmt.Println("less than or equal to twenty")
+	default:
+		fmt.Println("greater than twenty")
+	}
+}
+```
+
+- Use fallthrough to continue checking the conditions without break
+
+```golang
+func main() {
+	i := 10
+	switch {
+	case i <= 10:
+		fmt.Println("less than or equal to ten")	// this will work, because its seen first
+		fallthrough
+	case i<=20:
+		fmt.Println("less than or equal to twenty") // this will also work, due to fallthrough , indentionally make next case after fallthrough to execute
+	default:
+		fmt.Println("greater than twenty")
+	}
+}
+```
+
+- Type switching
+
+```golang
+func main() {
+	var i interface{} = 1
+	switch i.(type) {
+	case int:
+		fmt.Println("i is an integer")	// this will work because i is integer
+	case float64:
+		fmt.Println("i is float64")
+	case string:
+		fmt.Println("i is string")
+	default:
+		fmt.Println("another type")
+	}
+}
+```
+
+## Looping
+
+```golang
+func main() {
+	for i := 0; i < 5; i++ {
+		fmt.Println(i)
+	}
+}
+```
+
+- Two variables
+
+```golang
+func main() {
+	for i,j := 0,0 ; i < 5; i,j = i+1, j+1 {
+		fmt.Println(i,j)
+	}
+}
+```
+
+- Naked for loop
+
+```golang
+func main() {
+	i := 0
+	for ; i < 5; i++ {
+		fmt.Println(i)
+	}
+	fmt.Println(i) // the scope of i will be get outside the loop
+}
+```
+
+- Another naked loop - do while loop
+
+```golang
+func main() {
+	i := 0
+	for  i < 5  {
+		fmt.Println(i)
+		i++
+	}
+}
+```
+
+- Infinite loop
+
+```golang
+func main() {
+	i := 0
+	for {
+		fmt.Println(i)
+		i++
+		if i == 5 {
+			break
+		}
+	}
+}
+```
+
+- `continue` statement is also used to skip the iteration
