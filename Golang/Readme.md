@@ -453,3 +453,115 @@ func main() {
 ```
 
 - `continue` statement is also used to skip the iteration
+- Nested loop
+
+```golang
+func main() {
+	for i:= 0 ; i < 5; i++ {
+		for j:=0; j < 5; j++ {
+			fmt.Println(i,j)
+		}
+	}
+}
+```
+
+- Breaking the outer loop
+
+```golang
+func main() {
+Loop:
+	for i:= 0 ; i < 5; i++ {
+		for j:=0; j < 5; j++ {
+			fmt.Println(i,j)
+			if i*j >= 3{
+				break Loop	// break the outer loop
+			}
+		}
+	}
+}
+```
+
+- Work with collections - slice
+
+```golang
+func main(){
+	s := []int{1,2,3}
+	for k,v := range s {  // key(index) and value
+		fmt.Println(k,v)
+	}
+}
+```
+
+- Work with collections - map
+
+```go
+func main() {
+    statePopulation := map[string]int{
+    "California": 200,
+    "Texas":      300,
+    "New York":   400,
+    }
+	for k,v := range statePopulation {
+    	fmt.Println(k,v)
+	}
+}
+```
+
+- Work with string
+
+```go
+func main() {
+   s : = "hello"
+	for k,v := range s {
+    	fmt.Println(k, string(v))
+	}
+}
+```
+
+## Control Flow
+
+### Defer
+
+- Executes after the main function and before it return any result to the calling function
+- Open a resource, check a resource and close the resoure (with defer keyword)
+- Defer not take a function instead take a function call
+
+```golang
+func main(){
+	fmt.Println("start")
+	defer fmt.Println("middle") // print atlast after those two
+	fmt.Println("end")
+}
+```
+
+- Takes value at the time defer is called and not at the time the function is executed
+
+```golang
+func main(){
+	a := "start"
+	defer fmt.Println(a) // will print "start" and not "end"
+	a := "end"
+}
+```
+
+### Panic
+
+- When go can't continue to function and cannot figure out what it needed to do
+- Program exits with panic string
+
+```golang
+func main(){
+	fmt.Println("start")
+	panic("Something bad happened")
+	fmt.Println("end)
+}
+```
+
+- if defer and panic is there, defer will be executed before the function panic
+- function will stop executing but deferred function will still fire
+
+### Recover
+
+- recover() returns nil if the application is panicking and isn't nil then it returns the error that causing the application to panic 
+- only useful in deferred function
+- current function will not attempt to continue, but higher functions in call stack will
