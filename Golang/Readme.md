@@ -565,3 +565,174 @@ func main(){
 - recover() returns nil if the application is panicking and isn't nil then it returns the error that causing the application to panic 
 - only useful in deferred function
 - current function will not attempt to continue, but higher functions in call stack will
+
+## Pointer
+
+```golang
+func main(){
+	var a int = 42
+	var b *int = &a // declaring b as a pointer varible
+	fmt.Println(a,*b) //use * to dereference the variable, get the value
+
+	a = 50 // will change both variable
+	*b = 30 // will change both variable 
+}
+```
+
+```golang
+func main(){
+	a := [3]int{1,2,3}
+	b := &a[0]
+	c := &a[1]
+	fmt.Printf("%v %p %p" , a,b,c)
+}
+```
+
+```golang
+type myStruct struct{
+	foo int
+}
+
+func main(){
+	var ms *myStruct
+	ms = new(myStruct) // initialize the struct with 0
+	(*ms).foo = 42 // modify the variable
+	fmt.Println((*ms).foo)
+}
+```
+
+- the above ugly syntax can be corrected by : 
+
+```golang
+type myStruct struct{
+	foo int
+}
+
+func main(){
+	var ms *myStruct
+	ms = new(myStruct) // initialize the struct with 0
+	ms.foo = 42 // this will also work 
+	fmt.Println(ms.foo)
+}
+```
+
+## Function
+
+```golang
+func main(){
+	sey("hi","hello")
+}
+func sey(a ,b string){  // because both are string only specify one
+	fmt.Println(a,b)
+}
+```
+
+- Pointers in function
+
+```golang
+func main(){
+	g := "hello"
+	h := "Abhi"
+	sey(&g , &h)
+	fmt.Println(h) // print "Abhijith"
+}
+
+func sey(g ,h *string){
+	*h = "Abhijith"
+	fmt.Println(*h)  // print "Abhijith"
+}
+```
+
+- For a large datastructure, it is better to pass a pointer
+- Vairatic Parameter
+
+```golang
+func main(){
+	sum("The sum is",1,2,3,4,5)
+}
+func sum(msg string, values ...int){ // variatic paramter need to be at last
+	fmt.Println(values)
+	result := 0
+	for _,v := range values {
+		result += v
+	}
+	fmt.Println(result,msg)
+}
+```
+
+- Returning  as a pointer
+
+```golang
+func main(){
+	s := sum(1,2,3,4,5)
+	fmt.Println("Sum is", *s)
+}
+
+func sum(values ...int) *int { 
+	fmt.Println(values)
+	result := 0
+	for _,v := range values {
+		result += v
+	}
+	return &result
+}
+```
+
+- Named return value
+
+```golang
+func main(){
+	s := sum(1,2,3,4,5)
+	fmt.Println("Sum is", s)
+}
+
+func sum(values ...int) (result int) { 
+	fmt.Println(values)
+	result := 0
+	for _,v := range values {
+		result += v
+	}
+	return 
+}
+```
+- Returning multiple value
+
+```golang
+func main() {
+	d, err := divide(5.0, 0.0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(d)
+}
+
+func divide(a, b float64) (float64, error) { // returning multiple value
+	if b == 0.0 {
+		return 0.0, fmt.Errorf("Cannot divide by zero")
+	}
+	return a / b, nil
+}
+```
+
+- Anonymous function
+
+```golang
+func main(){
+
+	func (){
+		fmt.Println("Hello")
+	}() // calling the function after defining it
+}
+```
+
+- Function as a variable
+
+```golang
+func main(){
+	f := func(){ // var f func() = func() {
+		fmt.Println("Hello")
+	}
+	f()
+}
+```
