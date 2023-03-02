@@ -644,7 +644,7 @@ func sey(g ,h *string){
 ```
 
 - For a large datastructure, it is better to pass a pointer
-- Vairatic Parameter
+- Vairadic Parameter
 
 ```golang
 func main(){
@@ -734,5 +734,178 @@ func main(){
 		fmt.Println("Hello")
 	}
 	f()
+}
+```
+
+- Method
+    - It is a function in a known context
+
+```golang
+type greeter struct {
+	greeting string
+	name     string
+}
+// type count int -> also works
+func main() {
+	g := greeter{
+		greeting: "Hello",
+		name:     "Go",
+	}
+	g.greet()
+}
+
+func (g greeter) greet() { // we are getting the copy of struct
+	fmt.Println(g.greeting, g.name)
+}
+``` 
+
+```golang
+type greeter struct {
+	greeting string
+	name     string
+}
+// type count int -> also works
+func main() {
+	g := greeter{
+		greeting: "Hello",
+		name:     "Go",
+	}
+	g.greet()
+}
+
+func (g *greeter) greet() { // we are getting not copy of struct actual location
+	fmt.Println(g.greeting, g.name)
+}
+``` 
+
+## Interfaces
+
+- Instead of data, interfaces stores method definition
+
+```golang
+func main() {
+	var s Shapes = circle{2}
+	var d Shapes = square{2, 5}
+	fmt.Println(s.area())
+	fmt.Println(d.area())
+}
+
+type circle struct {
+	radius int
+}
+type square struct {
+	length  int
+	breadth int
+}
+
+type Shapes interface {
+	area() int
+}
+
+func (c circle) area() int {
+	return c.radius * c.radius
+}
+
+func (s square) area() int {
+	return s.length * s.breadth
+}
+
+```
+
+```golang
+func main() {
+	s := circle{2}
+	d := square{2, 5}
+	shape := []Shapes{s, d} // using the interface type for array
+	fmt.Println(shape[0].area())
+	fmt.Println(shape[1].area())
+}
+
+type circle struct {
+	radius int
+}
+type square struct {
+	length  int
+	breadth int
+}
+
+type Shapes interface {
+	area() int
+}
+
+func (c circle) area() int {
+	return c.radius * c.radius
+}
+
+func (s square) area() int {
+	return s.length * s.breadth
+}
+```
+
+## Goroutines
+
+- Implement concurrency
+- Go routine will execute separately from the main function
+
+```golang
+func main() {
+	go sayHello()
+	time.Sleep(100 * time.Millisecond)
+}
+
+func sayHello() {
+	fmt.Println("Hello")
+}
+
+```
+
+- Using anonymous function
+
+```golang
+func main(){
+	var msg = "Hello"
+	go func(){
+		fmt.Println(msg)
+	}()
+	time.Sleep(100 * time.Millisecond)
+}
+```
+
+```golang
+func main(){
+	var msg = "Hello"
+	go func(){
+		fmt.Println(msg)
+	}()
+	msg = "Goodbye" // it prints instead of "Hello"
+	time.Sleep(100 * time.Millisecond)
+}
+```
+
+- Solution for the above problem
+
+```golang
+func main(){
+	var msg = "Hello"
+	go func(msg string){
+		fmt.Println(msg)
+	}(msg)
+	msg = "Goodbye" // it prints "Hello"
+	time.Sleep(100 * time.Millisecond)
+}
+```
+
+- Use waitgroup to remove usage of sleep
+
+```golang
+func main(){
+	var msg = "Hello"
+	wg.Add(1) // increment 1
+	go func(msg string){
+		fmt.Println(msg)
+		wg.Done() // decrement 1
+	}(msg)
+	msg = "Goodbye" // it prints "Hello"
+	wg.Wait()
 }
 ```
