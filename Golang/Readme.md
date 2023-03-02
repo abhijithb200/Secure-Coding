@@ -909,3 +909,309 @@ func main(){
 	wg.Wait()
 }
 ```
+
+- 20 go routines - but raising each other and no synchronization
+
+```golang
+var wg = sync.WaitGroup{}
+var counter = 0
+
+func main(){
+	for i:= 0; i < 10; i++{
+		wg.Add(2)
+		go sayHello()
+		go increment()
+	}
+	wg.Wait()
+}
+
+func sayHello(){
+	fmt.Printf("Hello #%v\n", counter)
+	wg.Done()
+}
+
+func increment(){
+	counter ++
+	wg.Done()
+}
+```
+
+- For solving the above issue, use Mutex
+ 	- Only one routine can access the data at a single time and lock the rest
+	- If anything is reading anything can write it into it 
+	- Still out of sync but removed the random order
+
+```golang
+var wg = sync.WaitGroup{}
+var counter = 0
+var m = sync.RwMutex{} //Creating read-write mutex
+
+func main(){
+	runtime.GOMAXPROCS(100)
+	for i:= 0; i < 10; i++{
+		wg.Add(2)
+		go sayHello()
+		go increment()
+	}
+	wg.Wait()
+}
+
+func sayHello(){
+	m.RLock() // read lock - locking to read counter
+	fmt.Printf("Hello #%v\n", counter)
+	m.RUnlock() // releasing the lock with runlock
+	wg.Done() 
+}
+
+func increment(){
+	m.Lock() // write lock - where the varible is mutating
+	counter ++
+	m.Unlock()
+	wg.Done()
+}
+```
+
+- The solution for the above problem is:
+	- Locking everything in single context
+	- But it is not working parallely
+
+```golang
+var wg = sync.WaitGroup{}
+var counter = 0
+var m = sync.RwMutex{} //Creating read-write mutex
+
+func main(){
+	runtime.GOMAXPROCS(100) // forcing the system to use 100 core 
+	for i:= 0; i < 10; i++{
+		wg.Add(2)
+		m.RLock() // read lock - locking to read counter
+		go sayHello()
+
+		m.Lock() // write lock - where the varible is mutating
+		go increment()
+	}
+	wg.Wait()
+}
+
+func sayHello(){
+	fmt.Printf("Hello #%v\n", counter)
+	m.RUnlock() // releasing the lock with runlock
+	wg.Done() 
+}
+
+func increment(){
+	counter ++
+	m.Unlock()
+	wg.Done()
+}
+```
+
+## Channels
+
+- synchronize the data transmission multiple go routine
+- create a channel : specify the datatype that flow through the channel
+
+`ch := make(chan int)`
+
+```golang
+var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+
+	go func() { // the receiving goroutine
+		i := <-ch // pulling data from the channel and assigning to variabl i
+		fmt.Println(i)
+		wg.Done()
+	}()
+
+	go func() { // the sending goroutine
+		ch <- 42 // putting data into the channel
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+}
+```
+
+- Both are readers and writers at the same time
+
+```golang
+var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+
+	go func() {
+		i := <-ch      // 2
+		fmt.Println(i) // 3
+		ch <- 27       // 4
+		wg.Done()
+	}()
+
+	go func() {
+		ch <- 42          // 1
+		fmt.Println(<-ch) // 5
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+}
+```
+
+- Making read only and write only channels:
+
+```golang
+var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int)
+	wg.Add(2)
+
+	go func(ch <-chan int) { // receive only - data flow out of channel
+		i := <-ch
+		fmt.Println(i)
+		wg.Done()
+	}(ch)
+
+	go func(ch chan<- int) { // send only - data flow into the channel
+		ch <- 42
+		wg.Done()
+	}(ch)
+
+	wg.Wait()
+}
+```
+
+- Buffered Channel
+	- Maintain a data buffer to store the data and can be retrieved
+	- Used when the sender and the receiver works at the different frequency
+
+```golang
+var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int, 50) // the buffer can store 50 integers
+	wg.Add(2)
+	go func(ch <-chan int) {
+		i := <-ch // receiving 42 and prints
+		fmt.Println(i)
+
+		i = <-ch // receiving 27 and prints
+		fmt.Println(i)
+		wg.Done()
+	}(ch)
+	go func(ch chan<- int) {
+		ch <- 42
+		ch <- 27
+		wg.Done()
+	}(ch)
+	wg.Wait()
+}
+```
+
+- Continue monitoring the data flow
+
+```golang
+var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int, 50)
+	wg.Add(2)
+
+	go func(ch <-chan int) {
+		for i := range ch { // range for infinite times until the channel stop putting data
+			fmt.Println(i)
+		}
+		wg.Done()
+	}(ch)
+
+	go func(ch chan<- int) {
+		ch <- 42
+		ch <- 27
+
+		close(ch) // close the channel AFTER USE
+		wg.Done()
+	}(ch)
+
+	wg.Wait()
+
+}
+```
+
+```golang
+var wg = sync.WaitGroup{}
+
+func main() {
+	ch := make(chan int, 50)
+	wg.Add(2)
+
+	go func(ch <-chan int) {
+		for  { 
+			if i,ok := <- ch; ok{ // i will get the value and ok get the error; if no error, continue execution
+				fmt.Println(i)
+			}else{
+				break
+			}
+		}
+		wg.Done()
+	}(ch)
+
+	go func(ch chan<- int) {
+		ch <- 42
+		ch <- 27
+
+		close(ch) // close the channel AFTER USE
+		wg.Done()
+	}(ch)
+
+	wg.Wait()
+
+}
+```
+
+- Select statement
+
+```golang
+const (
+	logInfo    = "INFO"
+	logWarning = "WARNING"
+	logError   = "ERROR"
+)
+
+type logEntry struct {
+	severity string
+	message  string
+}
+
+var logCh = make(chan logEntry, 50)
+var doneCh = make(chan struct{}) // used as a switch to send close singal
+
+func main() {
+	go logger()
+	logCh <- logEntry{logInfo, "App is starting"}
+	logCh <- logEntry{logInfo, "App is shutting down"}
+
+	time.Sleep(100 * time.Millisecond)
+
+	doneCh <- struct{}{} // passing an empty struct signal to doneCh
+}
+
+func logger() {
+	for {
+		select {
+		case entry := <-logCh: // open when theere is anyting from logCh
+			fmt.Printf("%v - %v\n", entry.severity, entry.message)
+		case <-doneCh: // open when there is some singnal in doneCh
+			break
+		}
+	}
+}
+
+```
+
+## Context type 
