@@ -842,6 +842,132 @@ func (s square) area() int {
 }
 ```
 
+```golang
+type Shape interface {
+    area() float64
+}
+
+type Rectangle struct {
+    length float64
+    width  float64
+}
+
+func (r Rectangle) area() float64 {
+    return r.length * r.width
+}
+
+type Circle struct {
+    radius float64
+}
+
+func (c Circle) area() float64 {
+    return math.Pi * c.radius * c.radius
+}
+
+type Square struct {
+    side float64
+}
+
+func (s Square) area() float64 {
+    return s.side * s.side
+}
+
+func main() {
+    shapes := []Shape{
+        Rectangle{length: 2, width: 3},
+        Circle{radius: 5},
+        Square{side: 4},
+    }
+
+    for _, shape := range shapes {
+        fmt.Println(shape.area())
+    }
+}
+```
+
+```golang
+type Car struct {
+    name      string
+    model     string
+    engine    Engine
+}
+
+type Engine interface {
+    start() string
+}
+
+type GasEngine struct {
+    typeOfFuel string
+}
+
+func (ge GasEngine) start() string {
+    return "Starting gas engine..."
+}
+
+type ElectricEngine struct {
+    voltage float64
+}
+
+func (ee ElectricEngine) start() string {
+    return "Starting electric engine..."
+}
+
+func main() {
+    gasEngine := GasEngine{typeOfFuel: "petrol"}
+    electricEngine := ElectricEngine{voltage: 12.5}
+
+    car1 := Car{name: "Honda", model: "Civic", engine: gasEngine}
+    car2 := Car{name: "Tesla", model: "Model 3", engine: electricEngine}
+
+    fmt.Println(car1.engine.start())
+    fmt.Println(car2.engine.start())
+}
+```
+
+```golang
+type Car struct {
+    name   string
+    model  string
+    engine []Engine
+}
+
+type Engine interface {
+    start() string
+}
+
+type GasEngine struct {
+    typeOfFuel string
+}
+
+func (ge GasEngine) start() string {
+    return "Starting gas engine..."
+}
+
+type ElectricEngine struct {
+    voltage float64
+}
+
+func (ee ElectricEngine) start() string {
+    return "Starting electric engine..."
+}
+
+func main() {
+    gasEngine := GasEngine{typeOfFuel: "petrol"}
+    electricEngine := ElectricEngine{voltage: 12.5}
+
+    car1 := Car{name: "Honda", model: "Civic", engine: []Engine{gasEngine}}
+    car2 := Car{name: "Tesla", model: "Model 3", engine: []Engine{electricEngine}}
+
+    for _, e := range car1.engine {
+        fmt.Println(e.start())
+    }
+
+    for _, e := range car2.engine {
+        fmt.Println(e.start())
+    }
+}
+```
+
 ## Goroutines
 
 - Implement concurrency
