@@ -968,6 +968,46 @@ func main() {
 }
 ```
 
+- More simple syntax : 
+
+```golang
+type Engine interface {
+	start() string
+}
+type GasEngine struct {
+	typeOfFuel string
+	engine     Engine
+}
+func (ge GasEngine) start() string {
+	return "Starting gas engine"
+}
+func main() {
+	a := GasEngine{typeOfFuel: "petrol"}
+	car1 := GasEngine{typeOfFuel: "petrol", engine: a}
+	fmt.Println(car1)
+}
+```
+
+```golang
+type Engine interface {
+	start() string
+}
+type GasEngine struct {
+	typeOfFuel string
+	engine     []Engine
+}
+func (ge GasEngine) start() string {
+	return "Starting gas engine"
+}
+func main() {
+	a := GasEngine{typeOfFuel: "petrol"}
+	b := GasEngine{typeOfFuel: "diesel"}
+
+	car1 := GasEngine{typeOfFuel: "petrol", engine: []Engine{a, b}}
+	fmt.Println(car1)
+}
+```
+
 ## Goroutines
 
 - Implement concurrency
