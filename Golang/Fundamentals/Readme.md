@@ -1,3 +1,22 @@
+
+## Contents
+
+1. [Constants](#constants)
+2. [Arrays](#arrays)
+3. [Slice](#slice)
+3. [Maps](#maps)
+4. [Structs](#structs)
+5. [If](#if-statements)
+6. [Switch](#switch-statement)
+7. [Loop](#looping)
+8. [Control Flow](#control-flow)
+10. [Pointer](#pointer)
+11. [Function](#function)
+12. [Interface](#interfaces)
+13. [Go routines](#goroutines)
+14. [Channels](#channels)
+15. [Type Assertion](#type-assertion)
+
 ## Constants
 
 ```golang
@@ -1007,6 +1026,30 @@ func main() {
 	fmt.Println(car1)
 }
 ```
+- Interface as a type
+
+```golang
+type MyInterface interface {
+	fun1()
+	fun2()
+}
+type struct1 struct {
+	value1 string
+	value2 MyInterface
+}
+func (l struct1) fun2() {
+	print("hello\n")
+}
+func (l struct1) fun1() {
+	l.value2.fun2()
+	print(l.value1)
+}
+func main() {
+	var a = struct1{value1: "abhi", value2: struct1{value1: "sandra"}}
+	a.fun1()
+
+}
+```
 
 ## Goroutines
 
@@ -1380,4 +1423,111 @@ func logger() {
 
 ```
 
-## Context type 
+## Type Assertion
+
+```golang
+type Mine interface {
+	start()
+}
+
+func (n name) start() {
+	fmt.Println(n)
+}
+
+type name string
+
+func main() {
+	var i Mine = name("hi")
+	s := i.(name)
+	i.start()
+	s.start()
+}
+```
+
+## Embedded interface with inheritance
+
+```golang
+package main
+
+type A interface {
+	fun1()
+	fun2()
+}
+
+type B interface {
+	A
+	fun3()
+}
+
+type C interface {
+	fun4()
+}
+
+type S1 struct { //program - implements A
+	a1 B
+}
+
+func (s1 *S1) fun1() {
+	print("hi")
+}
+func (s1 *S1) fun2() {}
+
+type S2 struct { // letstatement - implements A and B but a3 has type C
+	a2 string
+	a3 C
+}
+
+func (s2 *S2) fun1() {
+	print("s2 fun1")
+}
+func (s2 *S2) fun2() {}
+func (s2 *S2) fun3() {
+	s2.a3.fun4()
+}
+
+type S3 struct { // identifier - implements A and C
+	a4 string
+	a5 string
+}
+
+func (s3 *S3) fun1() {}
+func (s3 *S3) fun2() {}
+func (s3 *S3) fun4() {
+	print("nice")
+}
+
+func main() {
+
+	a := &S2{a2: "abhi", a3: &S3{a4: "sahya", a5: "sandra"}}
+	a.fun3()
+
+}
+```
+
+## Function returning interface type
+
+```golang
+package main
+
+type A interface {
+	fun1()
+}
+
+type S1 struct {
+	name string
+}
+
+func (s1 S1) fun1() {}
+
+func (s1 S1) fun2() A {
+	return s1.fun3()
+}
+
+func (s1 S1) fun3() S1 {
+	return s1
+}
+
+func main() {
+
+}
+```
