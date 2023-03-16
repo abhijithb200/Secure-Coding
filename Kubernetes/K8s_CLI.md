@@ -2,6 +2,8 @@
 
 `kubectl get pod` - check the pods
 
+`kubectl get pod -o wide` - get extra informations on pods
+
 `kubectl get services` - list the services
 
 `kubectl get deployment` - list the deployments

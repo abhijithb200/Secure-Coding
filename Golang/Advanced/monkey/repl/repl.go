@@ -3,9 +3,11 @@ package repl
 import (
 	"bufio"
 	"fmt"
+
 	"io"
+	"monkey/evaluator"
 	"monkey/lexer"
-	"monkey/token"
+	"monkey/parser"
 )
 
 const PROMT = ">>"
@@ -23,9 +25,15 @@ func Start(in io.Reader, out io.Writer) {
 
 		line := scanner.Text() // the text user typed
 		l := lexer.New(line)
+		p := parser.New(l)
 
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() { //for k := 0; k < 4; k++
-			fmt.Printf("%+v\n", tok) // print the fields in the struct
+		program := p.ParseProgram()
+
+		evaluated := evaluator.Eval(program)
+
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
 		}
 	}
 
