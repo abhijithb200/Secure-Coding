@@ -12,8 +12,16 @@ type Node interface {
 	Out() Values
 }
 
+type Position struct {
+	StartLine int
+	EndLine   int
+	StartPos  int
+	EndPos    int
+}
+
 type Root struct {
-	Stmts []Node
+	Position *Position
+	Stmts    []Node
 }
 
 type Expression struct {
@@ -26,6 +34,8 @@ func (e *Expression) Out() Values {
 }
 
 type Echo struct {
+	Position *Position
+
 	Exprs []Node
 }
 
@@ -34,7 +44,13 @@ func (ec *Echo) Out() Values {
 	return nil
 }
 
+/*
+	Concatenation
+*/
+
 type Concat struct {
+	Position *Position
+
 	Left  Node
 	Right Node
 }
@@ -55,16 +71,21 @@ func (c *Concat) Out() Values {
 	if reflect.TypeOf(c.Left.Out()).String() == "parser.ArrayDimFetchNew" {
 		if a := c.Left.Out().(ArrayDimFetchNew).Variable; a == "_GET" {
 			vuln_reporter(&VulnReport{
-				name:    "XSS Echo",
-				message: "Found _GET[] with the parameter :" + c.Left.Out().(ArrayDimFetchNew).Value.(string),
+				name:     "XSS Echo",
+				message:  "Found _GET[] with the parameter : " + c.Left.Out().(ArrayDimFetchNew).Value.(string),
+				position: *c.Position,
 			})
+
+			fmt.Println(c.Position.EndPos)
 		}
 	} else if reflect.TypeOf(c.Right.Out()).String() == "parser.ArrayDimFetchNew" {
 		if a := c.Right.Out().(ArrayDimFetchNew).Variable; a == "_GET" {
 			vuln_reporter(&VulnReport{
-				name:    "XSS Echo",
-				message: "Found _GET[] with the parameter" + c.Right.Out().(ArrayDimFetchNew).Value.(string),
+				name:     "XSS Echo",
+				message:  "Found _GET[] with the parameter : " + c.Right.Out().(ArrayDimFetchNew).Value.(string),
+				position: *c.Position,
 			})
+
 		}
 	}
 
@@ -73,8 +94,9 @@ func (c *Concat) Out() Values {
 	for _, i := range VulnTracker.taintvar {
 		if c.Right.Out() == i || c.Left.Out() == i {
 			vuln_reporter(&VulnReport{
-				name:    "XSS Echo Parameter",
-				message: "Found Tainted value " + i,
+				name:     "XSS Echo Parameter",
+				message:  "Found Tainted value " + i,
+				position: *c.Position,
 			})
 		}
 	}
@@ -83,7 +105,13 @@ func (c *Concat) Out() Values {
 
 }
 
+/*
+Array - Dimention and Value
+*/
+
 type ArrayDimFetch struct {
+	Position *Position
+
 	Variable Node
 	Dim      Node
 }
@@ -98,6 +126,8 @@ func (a *ArrayDimFetch) Out() Values {
 }
 
 type Variable struct {
+	Position *Position
+
 	VarName Node
 }
 
@@ -123,9 +153,14 @@ type ConstFetch struct {
 }
 
 func (c *ConstFetch) Out() Values {
-
 	return c.Constant.Out()
 }
+
+/*
+ Assignment operator (=)
+ Left - Variable
+ Right - Expression
+*/
 
 type Assign struct {
 	Variable   Node
@@ -145,9 +180,13 @@ func (a *Assign) Out() Values {
 	return nil
 }
 
-// output values
+/*
+ The last struct that return something
+*/
 
 type String struct {
+	Position *Position
+
 	Value string
 }
 
@@ -157,6 +196,8 @@ func (s *String) Out() Values {
 }
 
 type Identifier struct {
+	Position *Position
+
 	Value string
 }
 
