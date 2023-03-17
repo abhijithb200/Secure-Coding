@@ -1,24 +1,21 @@
 package main
 
-import (
-	"github.com/z7zmey/php-parser/php5"
-	"github.com/z7zmey/php-parser/visitor"
-	"os"
-)
+import "codeguardian/parser"
 
 func main() {
-	src := []byte(`<?php
-	echo 'my name is'.$_GET['name'];
-	`)
+	// src := []byte(`<?php
+	// $p = $_GET['name'];
+	// echo 'my name is'.p;
+	// `)
 
-	parser := php5.NewParser(src, "example.php")
-	parser.Parse()
+	// parser := php5.NewParser(src, "example.php")
+	// parser.Parse()
 
-	visitor := visitor.GoDumper{
-		Writer: os.Stdout,
-	}
-	//
-	rootNode := parser.GetRootNode()
-	rootNode.Walk(&visitor)
-	// parser.Parser()
+	// visitor := visitor.GoDumper{
+	// 	Writer: os.Stdout,
+	// }
+	// //
+	// rootNode := parser.GetRootNode()
+	// rootNode.Walk(&visitor)
+	parser.Parser()
 }
