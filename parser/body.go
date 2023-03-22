@@ -25,6 +25,8 @@ type Root struct {
 }
 
 type Expression struct {
+	Position *Position
+
 	Expr Node
 }
 
@@ -56,33 +58,37 @@ type Concat struct {
 }
 
 func vuln_reporter(a *VulnReport) {
-	fmt.Print("[!]Vulnerability Found\n")
-	fmt.Println("Name :", a.name)
+	fmt.Print("[!]Vulnerability Found on line ", a.position.StartLine, "\n")
+	fmt.Println("Type :", a.name)
 	fmt.Println("Description :", a.message)
+	fmt.Println("----------------------------------------------------")
+	fmt.Println()
 }
 
 func (c *Concat) Out() Values {
 
-	// fmt.Println("right", reflect.TypeOf(c.Right.Out()).String(), c.Right.Out())
-	// fmt.Println("left", reflect.TypeOf(c.Left.Out()).String(), c.Left.Out())
+	// fmt.Println("right", reflect.TypeOf(c.Right.Out()).String())
+	// fmt.Println("left", reflect.TypeOf(c.Left.Out()).String())
+
+	a := c.Left.Out()
+	b := c.Right.Out()
 
 	// Finding $_GET[] or $_POST[] used directly in the echo statement
 
-	if reflect.TypeOf(c.Left.Out()).String() == "parser.ArrayDimFetchNew" {
-		if a := c.Left.Out().(ArrayDimFetchNew).Variable; a == "_GET" {
+	if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
+		if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
 			vuln_reporter(&VulnReport{
 				name:     "XSS Echo",
-				message:  "Found _GET[] with the parameter : " + c.Left.Out().(ArrayDimFetchNew).Value.(string),
+				message:  "Found " + a.(string) + " inside echo with the parameter : " + c.Left.Out().(ArrayDimFetchNew).Value.(string),
 				position: *c.Position,
 			})
 
-			fmt.Println(c.Position.EndPos)
 		}
-	} else if reflect.TypeOf(c.Right.Out()).String() == "parser.ArrayDimFetchNew" {
-		if a := c.Right.Out().(ArrayDimFetchNew).Variable; a == "_GET" {
+	} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
+		if y := b.(ArrayDimFetchNew).Variable; y == "_GET" || y == "_POST" {
 			vuln_reporter(&VulnReport{
 				name:     "XSS Echo",
-				message:  "Found _GET[] with the parameter : " + c.Right.Out().(ArrayDimFetchNew).Value.(string),
+				message:  "Found " + a.(string) + " inside echo with the parameter : " + c.Right.Out().(ArrayDimFetchNew).Value.(string),
 				position: *c.Position,
 			})
 
@@ -91,13 +97,32 @@ func (c *Concat) Out() Values {
 
 	// Finding is there any tainted variable used on echo statement
 
-	for _, i := range VulnTracker.taintvar {
-		if c.Right.Out() == i || c.Left.Out() == i {
-			vuln_reporter(&VulnReport{
-				name:     "XSS Echo Parameter",
-				message:  "Found Tainted value " + i,
-				position: *c.Position,
-			})
+	if reflect.TypeOf(b).String() == "parser.IdentifierNew" {
+
+		x := b.(IdentifierNew).Value
+
+		for _, i := range VulnTracker.taintvar {
+			if x == i {
+				vuln_reporter(&VulnReport{
+					name:    "XSS Echo Parameter ",
+					message: "Found Tainted value " + i,
+					// position: *c.Position,
+				})
+			}
+		}
+	} else if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
+
+		y := a.(IdentifierNew).Value
+
+		for _, i := range VulnTracker.taintvar {
+
+			if y == i {
+				vuln_reporter(&VulnReport{
+					name:    "XSS Echo Parameter",
+					message: "Found Tainted value " + i,
+					// position: *c.Position,
+				})
+			}
 		}
 	}
 
@@ -122,7 +147,7 @@ type ArrayDimFetchNew struct {
 }
 
 func (a *ArrayDimFetch) Out() Values {
-	return ArrayDimFetchNew{Variable: a.Variable.Out(), Value: a.Dim.Out()}
+	return ArrayDimFetchNew{Variable: a.Variable.Out().(IdentifierNew).Value, Value: a.Dim.Out()}
 }
 
 type Variable struct {
@@ -163,6 +188,7 @@ func (c *ConstFetch) Out() Values {
 */
 
 type Assign struct {
+	Position   *Position
 	Variable   Node
 	Expression Node
 }
@@ -171,10 +197,28 @@ func (a *Assign) Out() Values {
 	// a.Expression.Out() // right
 	// a.Variable.Out()   // left
 
-	if reflect.TypeOf(a.Expression.Out()).String() == "parser.ArrayDimFetchNew" {
-		if b := a.Expression.Out().(ArrayDimFetchNew).Variable; b == "_GET" {
-			VulnTracker.taintvar = append(VulnTracker.taintvar, a.Variable.Out().(string))
+	x := a.Expression.Out()
+	y := a.Variable.Out()
+
+	// if any variable accept value from _GET or _POST add to the tainted array list
+	if reflect.TypeOf(x).String() == "parser.ArrayDimFetchNew" {
+		if b := x.(ArrayDimFetchNew).Variable; b == "_GET" || b == "_POST" {
+			VulnTracker.taintvar = append(VulnTracker.taintvar, y.(IdentifierNew).Value.(string))
 		}
+	}
+
+	// if any assignment have right varible tainted, add left variable to the tainted list
+	if reflect.TypeOf(x).String() == "parser.IdentifierNew" {
+		// fmt.Println(a.Variable.Out().(IdentifierNew).Value) // b
+		// fmt.Println(x.(IdentifierNew).Value)                // a
+
+		for _, i := range VulnTracker.taintvar {
+			if x.(IdentifierNew).Value == i {
+				VulnTracker.taintvar = append(VulnTracker.taintvar, y.(IdentifierNew).Value.(string))
+			}
+		}
+
+		fmt.Println(VulnTracker.taintvar)
 	}
 
 	return nil
@@ -198,12 +242,17 @@ func (s *String) Out() Values {
 type Identifier struct {
 	Position *Position
 
-	Value string
+	Value Values
+}
+
+// created identifiernew to distinguish between string an actual identifier
+type IdentifierNew struct {
+	Value Values
 }
 
 func (i *Identifier) Out() Values {
 
-	return i.Value
+	return IdentifierNew{Value: i.Value}
 }
 
 type NamePart struct {
