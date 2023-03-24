@@ -21,7 +21,8 @@ type Position struct {
 
 type Root struct {
 	Position *Position
-	Stmts    []Node
+
+	Stmts []Node
 }
 
 type Expression struct {
@@ -78,18 +79,18 @@ func (c *Concat) Out() Values {
 	if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
 		if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
 			vuln_reporter(&VulnReport{
-				name:     "XSS Echo",
-				message:  "Found " + a.(string) + " inside echo with the parameter : " + c.Left.Out().(ArrayDimFetchNew).Value.(string),
-				position: *c.Position,
+				name:    "XSS Echo",
+				message: "Found " + x.(string) + " inside echo with the parameter : " + a.(ArrayDimFetchNew).Value.(string),
+				// position: *c.Position,
 			})
 
 		}
 	} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
 		if y := b.(ArrayDimFetchNew).Variable; y == "_GET" || y == "_POST" {
 			vuln_reporter(&VulnReport{
-				name:     "XSS Echo",
-				message:  "Found " + a.(string) + " inside echo with the parameter : " + c.Right.Out().(ArrayDimFetchNew).Value.(string),
-				position: *c.Position,
+				name:    "XSS Echo",
+				message: "Found " + y.(string) + " inside echo with the parameter : " + b.(ArrayDimFetchNew).Value.(string),
+				// position: *c.Position,
 			})
 
 		}

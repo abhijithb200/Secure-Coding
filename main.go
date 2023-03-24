@@ -4,9 +4,8 @@ import "codeguardian/parser"
 
 func main() {
 	// src := []byte(`<?php
-	// $a = $_GET['name'];
-	// $b = $a;
-	// echo 'my address is'.$b;
+	// $a = $_GET['name']."abhi";
+	// echo 'my address is'.$a;
 	// `)
 
 	// parser := php5.NewParser(src, "example.php")

@@ -19,28 +19,19 @@ func Parser() {
 							Value: "a",
 						},
 					},
-					Expression: &ArrayDimFetch{
-						Variable: &Variable{
-							VarName: &Identifier{
-								Value: "_GET",
+					Expression: &Concat{
+						Left: &ArrayDimFetch{
+							Variable: &Variable{
+								VarName: &Identifier{
+									Value: "_GET",
+								},
+							},
+							Dim: &String{
+								Value: "'name'",
 							},
 						},
-						Dim: &String{
-							Value: "'name'",
-						},
-					},
-				},
-			},
-			&Expression{
-				Expr: &Assign{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "b",
-						},
-					},
-					Expression: &Variable{
-						VarName: &Identifier{
-							Value: "a",
+						Right: &String{
+							Value: "\"abhi\"",
 						},
 					},
 				},
@@ -53,7 +44,7 @@ func Parser() {
 						},
 						Right: &Variable{
 							VarName: &Identifier{
-								Value: "b",
+								Value: "a",
 							},
 						},
 					},
