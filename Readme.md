@@ -25,3 +25,26 @@ Improved collaboration between developers and security teams.
 Time and cost savings due to automated code analysis.
 Faster time to market, as security vulnerabilities are identified and remediated early in the development process.
 Overall, CodeGuardian is a powerful tool for DevSecOps teams looking to automate code analysis and identify security vulnerabilities in source code.
+
+# Vulnerability Detection Scope
+
+## Reflected XSS
+
+```php
+echo "Name is :".$_GET['name'];
+```
+
+```php
+$a = $_GET['name'];
+echo "Name is".$a;
+```
+
+```php
+$a = $_GET['name'];
+$b = $a;
+echo "Name is".$b;
+```
+
+```php
+$a = "Name is ".$_GET['name'];
+echo $a;

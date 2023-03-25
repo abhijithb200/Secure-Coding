@@ -20,18 +20,47 @@ func Parser() {
 						},
 					},
 					Expression: &Concat{
-						Left: &ArrayDimFetch{
+						Left: &Concat{
+							Left: &Concat{
+								Left: &Concat{
+									Left: &ArrayDimFetch{
+										Variable: &Variable{
+											VarName: &Identifier{
+												Value: "_GET",
+											},
+										},
+										Dim: &String{
+											Value: "'name'",
+										},
+									},
+									Right: &String{
+										Value: "\"abhi\"",
+									},
+								},
+								Right: &ArrayDimFetch{
+									Variable: &Variable{
+										VarName: &Identifier{
+											Value: "_GET",
+										},
+									},
+									Dim: &String{
+										Value: "'age'",
+									},
+								},
+							},
+							Right: &String{
+								Value: "\"is goin to be a super star in\"",
+							},
+						},
+						Right: &ArrayDimFetch{
 							Variable: &Variable{
 								VarName: &Identifier{
 									Value: "_GET",
 								},
 							},
 							Dim: &String{
-								Value: "'name'",
+								Value: "'nation'",
 							},
-						},
-						Right: &String{
-							Value: "\"abhi\"",
 						},
 					},
 				},
@@ -54,7 +83,9 @@ func Parser() {
 	}
 	for _, r := range program.Stmts {
 
-		r.Out()
+		r.Out("")
+
+		// fmt.Println(VulnTracker.taintvar)
 
 		// switch r.(type) Println()
 		// case *Echo:
