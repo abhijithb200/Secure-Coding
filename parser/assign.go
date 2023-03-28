@@ -17,13 +17,13 @@ type Assign struct {
 }
 
 func (a *Assign) Out(from string) Values {
-	// a.Expression.Out() // right
-	// a.Variable.Out()   // left
 
 	x := a.Expression.Out("assign")
 	y := a.Variable.Out("")
 
 	if x == CONCAT_WITH_VULN_ARRAY {
+		VulnTracker.taintvar = append(VulnTracker.taintvar, y.(IdentifierNew).Value.(string))
+	} else if x == CONCAT_WITH_TAINT_VAR {
 		VulnTracker.taintvar = append(VulnTracker.taintvar, y.(IdentifierNew).Value.(string))
 	}
 

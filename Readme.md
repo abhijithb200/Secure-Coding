@@ -48,3 +48,10 @@ echo "Name is".$b;
 ```php
 $a = "Name is ".$_GET['name'];
 echo $a;
+```
+
+```php
+$a = $_GET['name'];
+$b = "Name is ".$a;
+echo "I am ".$b;
+```

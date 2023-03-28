@@ -1,5 +1,7 @@
 package parser
 
+import "fmt"
+
 type VulnReport struct {
 	name     string
 	message  string
@@ -19,47 +21,32 @@ func Parser() {
 							Value: "a",
 						},
 					},
-					Expression: &Concat{
-						Left: &Concat{
-							Left: &Concat{
-								Left: &Concat{
-									Left: &ArrayDimFetch{
-										Variable: &Variable{
-											VarName: &Identifier{
-												Value: "_GET",
-											},
-										},
-										Dim: &String{
-											Value: "'name'",
-										},
-									},
-									Right: &String{
-										Value: "\"abhi\"",
-									},
-								},
-								Right: &ArrayDimFetch{
-									Variable: &Variable{
-										VarName: &Identifier{
-											Value: "_GET",
-										},
-									},
-									Dim: &String{
-										Value: "'age'",
-									},
-								},
-							},
-							Right: &String{
-								Value: "\"is goin to be a super star in\"",
+					Expression: &ArrayDimFetch{
+						Variable: &Variable{
+							VarName: &Identifier{
+								Value: "_GET",
 							},
 						},
-						Right: &ArrayDimFetch{
-							Variable: &Variable{
-								VarName: &Identifier{
-									Value: "_GET",
-								},
-							},
-							Dim: &String{
-								Value: "'nation'",
+						Dim: &String{
+							Value: "'name'",
+						},
+					},
+				},
+			},
+			&Expression{
+				Expr: &Assign{
+					Variable: &Variable{
+						VarName: &Identifier{
+							Value: "b",
+						},
+					},
+					Expression: &Concat{
+						Left: &String{
+							Value: "\"Name is \"",
+						},
+						Right: &Variable{
+							VarName: &Identifier{
+								Value: "a",
 							},
 						},
 					},
@@ -69,11 +56,11 @@ func Parser() {
 				Exprs: []Node{
 					&Concat{
 						Left: &String{
-							Value: "'my address is'",
+							Value: "\"I am \"",
 						},
 						Right: &Variable{
 							VarName: &Identifier{
-								Value: "a",
+								Value: "b",
 							},
 						},
 					},
@@ -85,7 +72,7 @@ func Parser() {
 
 		r.Out("")
 
-		// fmt.Println(VulnTracker.taintvar)
+		fmt.Println(VulnTracker.taintvar)
 
 		// switch r.(type) Println()
 		// case *Echo:

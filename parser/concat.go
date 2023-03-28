@@ -28,13 +28,17 @@ func (c *Concat) Out(from string) Values {
 	a := c.Left.Out(from)
 	b := c.Right.Out(from)
 
-	// exit from recurssion when concatenation contain vuln array
+	// exit from recurssion
 	if a == CONCAT_WITH_VULN_ARRAY || b == CONCAT_WITH_VULN_ARRAY {
 		return CONCAT_WITH_VULN_ARRAY
+	} else if a == CONCAT_WITH_TAINT_VAR || b == CONCAT_WITH_TAINT_VAR {
+		return CONCAT_WITH_TAINT_VAR
 	}
 
 	// finding Vulneravle array used in expression in assign
 	if from == "assign" {
+
+		// if it contain the vulnerable arrray
 		if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
 			if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
 				return CONCAT_WITH_VULN_ARRAY
@@ -42,6 +46,22 @@ func (c *Concat) Out(from string) Values {
 		} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
 			if x := b.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
 				return CONCAT_WITH_VULN_ARRAY
+			}
+		}
+
+		// if it contain the tainted variable
+		if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
+			for _, i := range VulnTracker.taintvar {
+				if a.(IdentifierNew).Value == i {
+					return CONCAT_WITH_TAINT_VAR
+				}
+			}
+
+		} else if reflect.TypeOf(b).String() == "parser.IdentifierNew" {
+			for _, i := range VulnTracker.taintvar {
+				if b.(IdentifierNew).Value == i {
+					return CONCAT_WITH_TAINT_VAR
+				}
 			}
 		}
 	}
@@ -81,7 +101,7 @@ func (c *Concat) Out(from string) Values {
 				if x == i {
 					vuln_reporter(&VulnReport{
 						name:    "Reflected XSS ",
-						message: "Found Tainted value " + i,
+						message: "Found Tainted value " + i + " inside echo",
 						// position: *c.Position,
 					})
 				}
@@ -95,7 +115,7 @@ func (c *Concat) Out(from string) Values {
 				if y == i {
 					vuln_reporter(&VulnReport{
 						name:    "Reflected XSS",
-						message: "Found Tainted value " + i,
+						message: "Found Tainted value " + i + " inside echo",
 						// position: *c.Position,
 					})
 				}
