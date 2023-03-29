@@ -20,32 +20,30 @@ type ConcatNew struct {
 	Right Values
 }
 
-func (c *Concat) Out(from string) Values {
+func (c *Concat) Out(argstore ArgStore) Values {
 
 	// fmt.Println("right", reflect.TypeOf(c.Right.Out()).String())
 	// fmt.Println("left", reflect.TypeOf(c.Left.Out()).String())
 
-	a := c.Left.Out(from)
-	b := c.Right.Out(from)
-
-	// exit from recurssion
-	if a == CONCAT_WITH_VULN_ARRAY || b == CONCAT_WITH_VULN_ARRAY {
-		return CONCAT_WITH_VULN_ARRAY
-	} else if a == CONCAT_WITH_TAINT_VAR || b == CONCAT_WITH_TAINT_VAR {
-		return CONCAT_WITH_TAINT_VAR
-	}
+	a := c.Left.Out(argstore)
+	b := c.Right.Out(argstore)
 
 	// finding Vulneravle array used in expression in assign
-	if from == "assign" {
+	if argstore.from == "assign" {
 
 		// if it contain the vulnerable arrray
 		if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
 			if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
-				return CONCAT_WITH_VULN_ARRAY
+				// p :=  make(map[string]TaintSpec)
+				// p[argstore.variable] = TaintSpec{
+				// 	alias: argstore.variable,
+
+				// }
+				VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
 			}
 		} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
 			if x := b.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
-				return CONCAT_WITH_VULN_ARRAY
+				VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
 			}
 		}
 
@@ -53,14 +51,14 @@ func (c *Concat) Out(from string) Values {
 		if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
 			for _, i := range VulnTracker.taintvar {
 				if a.(IdentifierNew).Value == i {
-					return CONCAT_WITH_TAINT_VAR
+					VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
 				}
 			}
 
 		} else if reflect.TypeOf(b).String() == "parser.IdentifierNew" {
 			for _, i := range VulnTracker.taintvar {
 				if b.(IdentifierNew).Value == i {
-					return CONCAT_WITH_TAINT_VAR
+					VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
 				}
 			}
 		}
@@ -91,7 +89,7 @@ func (c *Concat) Out(from string) Values {
 
 	// Finding is there any tainted variable used on echo statement
 
-	if from == "echo" {
+	if argstore.from == "echo" {
 
 		if reflect.TypeOf(b).String() == "parser.IdentifierNew" {
 

@@ -2,10 +2,16 @@ package parser
 
 import "fmt"
 
+type TaintSpec struct {
+	alias string
+	spec  Values
+}
+
 type VulnReport struct {
 	name     string
 	message  string
 	position Position
+
 	taintvar []string
 }
 
@@ -70,7 +76,7 @@ func Parser() {
 	}
 	for _, r := range program.Stmts {
 
-		r.Out("")
+		r.Out(ArgStore{})
 
 		fmt.Println(VulnTracker.taintvar)
 

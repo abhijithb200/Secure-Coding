@@ -10,7 +10,7 @@ type String struct {
 	Value string
 }
 
-func (s *String) Out(from string) Values {
+func (s *String) Out(argstore ArgStore) Values {
 
 	return s.Value
 }
@@ -26,7 +26,7 @@ type IdentifierNew struct {
 	Value Values
 }
 
-func (i *Identifier) Out(from string) Values {
+func (i *Identifier) Out(argstore ArgStore) Values {
 
 	return IdentifierNew{Value: i.Value}
 }
@@ -35,6 +35,6 @@ type NamePart struct {
 	Value string
 }
 
-func (n *NamePart) Out(from string) Values {
+func (n *NamePart) Out(argstore ArgStore) Values {
 	return n.Value
 }

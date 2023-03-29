@@ -8,7 +8,13 @@ type Values interface {
 }
 
 type Node interface {
-	Out(from string) Values
+	Out(argstore ArgStore) Values
+}
+
+// used to pass argument across functions
+type ArgStore struct {
+	from     string
+	variable string
 }
 
 type Position struct {
@@ -30,8 +36,8 @@ type Expression struct {
 	Expr Node
 }
 
-func (e *Expression) Out(from string) Values {
-	e.Expr.Out("")
+func (e *Expression) Out(argstore ArgStore) Values {
+	e.Expr.Out(ArgStore{})
 	return nil
 }
 
@@ -41,8 +47,10 @@ type Echo struct {
 	Exprs []Node
 }
 
-func (ec *Echo) Out(from string) Values {
-	ec.Exprs[0].Out("echo")
+func (ec *Echo) Out(argstore ArgStore) Values {
+	ec.Exprs[0].Out(ArgStore{
+		from: "echo",
+	})
 	return nil
 }
 
@@ -70,8 +78,8 @@ type ArrayDimFetchNew struct {
 	Value    Values
 }
 
-func (a *ArrayDimFetch) Out(from string) Values {
-	return ArrayDimFetchNew{Variable: a.Variable.Out("").(IdentifierNew).Value, Value: a.Dim.Out("")}
+func (a *ArrayDimFetch) Out(argstore ArgStore) Values {
+	return ArrayDimFetchNew{Variable: a.Variable.Out(ArgStore{}).(IdentifierNew).Value, Value: a.Dim.Out(ArgStore{})}
 }
 
 type Variable struct {
@@ -80,18 +88,18 @@ type Variable struct {
 	VarName Node
 }
 
-func (v *Variable) Out(from string) Values {
+func (v *Variable) Out(argstore ArgStore) Values {
 
-	return v.VarName.Out("")
+	return v.VarName.Out(ArgStore{})
 }
 
 type Name struct {
 	Parts []Node
 }
 
-func (n *Name) Out(from string) Values {
+func (n *Name) Out(argstore ArgStore) Values {
 	for _, i := range n.Parts {
-		return i.Out("")
+		return i.Out(ArgStore{})
 	}
 
 	return nil
@@ -101,6 +109,6 @@ type ConstFetch struct {
 	Constant Node
 }
 
-func (c *ConstFetch) Out(from string) Values {
-	return c.Constant.Out("")
+func (c *ConstFetch) Out(argstore ArgStore) Values {
+	return c.Constant.Out(ArgStore{})
 }
