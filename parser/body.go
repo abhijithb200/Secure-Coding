@@ -58,6 +58,14 @@ func vuln_reporter(a *VulnReport) {
 	fmt.Print("[!]Vulnerability Found on line ", a.position.StartLine, "\n")
 	fmt.Println("Type :", a.name)
 	fmt.Println("Description :", a.message)
+
+	for _, i := range VulnTracker.taintvar {
+		for k, v := range i {
+			if k == a.some.(TaintSpec).alias {
+				fmt.Println("Pari :", v.spec)
+			}
+		}
+	}
 	fmt.Println("----------------------------------------------------")
 	fmt.Println()
 }

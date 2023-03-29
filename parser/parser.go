@@ -12,7 +12,9 @@ type VulnReport struct {
 	message  string
 	position Position
 
-	taintvar []string
+	some Values
+
+	taintvar []map[string]TaintSpec
 }
 
 var VulnTracker *VulnReport = &VulnReport{}
@@ -78,8 +80,11 @@ func Parser() {
 
 		r.Out(ArgStore{})
 
-		fmt.Println(VulnTracker.taintvar)
+		// for k, v := range VulnTracker.taintvar[0] {
+		// 	fmt.Println(k, v)
+		// }
 
+		fmt.Println(VulnTracker.taintvar)
 		// switch r.(type) Println()
 		// case *Echo:
 		// 	// s := r.(*Echo).Exprs[0]

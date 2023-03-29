@@ -33,32 +33,61 @@ func (c *Concat) Out(argstore ArgStore) Values {
 
 		// if it contain the vulnerable arrray
 		if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
-			if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
-				// p :=  make(map[string]TaintSpec)
-				// p[argstore.variable] = TaintSpec{
-				// 	alias: argstore.variable,
 
-				// }
-				VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
+			if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
+				p := make(map[string]TaintSpec)
+				p[argstore.variable] = TaintSpec{
+					alias: argstore.variable,
+					spec:  a.(ArrayDimFetchNew),
+				}
+				VulnTracker.taintvar = append(VulnTracker.taintvar, p)
 			}
 		} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
+
 			if x := b.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
-				VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
+				p := make(map[string]TaintSpec)
+				p[argstore.variable] = TaintSpec{
+					alias: argstore.variable,
+					spec:  b.(ArrayDimFetchNew),
+				}
+				VulnTracker.taintvar = append(VulnTracker.taintvar, p)
 			}
 		}
 
 		// if it contain the tainted variable
 		if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
+
 			for _, i := range VulnTracker.taintvar {
-				if a.(IdentifierNew).Value == i {
-					VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
+				for k, _ := range i {
+					if a.(IdentifierNew).Value == k {
+
+						p := make(map[string]TaintSpec)
+
+						p[argstore.variable] = TaintSpec{
+							alias: k,
+							// spec:  v,
+						}
+						VulnTracker.taintvar = append(VulnTracker.taintvar, p)
+					}
 				}
 			}
 
 		} else if reflect.TypeOf(b).String() == "parser.IdentifierNew" {
+
 			for _, i := range VulnTracker.taintvar {
-				if b.(IdentifierNew).Value == i {
-					VulnTracker.taintvar = append(VulnTracker.taintvar, argstore.variable)
+				for k, _ := range i {
+
+					// if expression contain tainted value, set the spec of current variable to it
+					if b.(IdentifierNew).Value == k {
+
+						p := make(map[string]TaintSpec)
+
+						p[argstore.variable] = TaintSpec{
+							alias: k,
+							// spec:  v,
+						}
+						VulnTracker.taintvar = append(VulnTracker.taintvar, p)
+					}
 				}
 			}
 		}
@@ -96,12 +125,15 @@ func (c *Concat) Out(argstore ArgStore) Values {
 			x := b.(IdentifierNew).Value
 
 			for _, i := range VulnTracker.taintvar {
-				if x == i {
-					vuln_reporter(&VulnReport{
-						name:    "Reflected XSS ",
-						message: "Found Tainted value " + i + " inside echo",
-						// position: *c.Position,
-					})
+				for k, v := range i {
+					if x == k {
+						vuln_reporter(&VulnReport{
+							name:    "Reflected XSS ",
+							message: "Found Tainted value " + x.(string) + " inside echo",
+							some:    v,
+							// position: *c.Position,
+						})
+					}
 				}
 			}
 		} else if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
@@ -110,12 +142,15 @@ func (c *Concat) Out(argstore ArgStore) Values {
 
 			for _, i := range VulnTracker.taintvar {
 
-				if y == i {
-					vuln_reporter(&VulnReport{
-						name:    "Reflected XSS",
-						message: "Found Tainted value " + i + " inside echo",
-						// position: *c.Position,
-					})
+				for k, v := range i {
+					if y == k {
+						vuln_reporter(&VulnReport{
+							name:    "Reflected XSS ",
+							message: "Found Tainted value  inside echo",
+							some:    v,
+							// position: *c.Position,
+						})
+					}
 				}
 			}
 		}
