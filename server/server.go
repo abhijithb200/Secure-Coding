@@ -3,10 +3,13 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"regexp"
 
 	"github.com/pkg/errors"
 
 	"github.com/sourcegraph/jsonrpc2"
+	"github.com/vektah/gqlparser/ast"
+	"github.com/vektah/gqlparser/parser"
 )
 
 const version = "UNTAGGED"
@@ -18,7 +21,14 @@ const (
 type Server struct {
 	isInitialized bool
 
-	Endpoint string
+	Endpoint string // "global" where the schema sits
+	m        map[string]fileMetadata
+}
+
+func New() *Server {
+	return &Server{
+		m: make(map[string]fileMetadata),
+	}
 }
 
 func (s *Server) Stop() {}
@@ -64,9 +74,56 @@ func (s *Server) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.
 		if req.Params == nil {
 			return nil, errors.Errorf("Cannot have nil parameter for textDocument/didOpen")
 		}
+
+		var params DidOpenTextDocumentParams
+		if err := json.Unmarshal(*req.Params, &params); err != nil {
+			return nil, errors.Wrap(err, "Unable to unmarshall DidOpenTextDocumentParams")
+		}
+
+		m := fileMetadata{
+			TextDocumentItem: params.TextDocument,
+		}
+		s.m[m.URI] = m
+
+		parsed, err := parse(m.URI, m.TextDocumentItem.Text)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Cannot parse input file")
+		}
+		s.m[m.URI].parsed = parsed
+
+		switch parsed.(type) {
+		case *ast.QueryDocument:
+		case *ast.SchemaDocument:
+			s.m[m.URI].schemaURI = parsed
+		default:
+		}
+
+	case "textDocument/didChange":
+		if req.Params == nil {
+			return nil, errors.Errorf("Cannot have nil parameter for textDocument/didChange")
+		}
+
+		var params DidChangeTextDocumentParams
+
+	// when the file is saved - parse the text
 	case "textDocument/didSave":
+		if req.Params == nil {
+			return nil, errors.Errorf("Cannot have nil parameter for textDocument/didOpen")
+		}
+		var params DidSaveTextDocumentParams
+		if err := json.Unmarshal(*req.Params, &params); err != nil {
+			return nil, errors.Wrap(err, "Unable to unmarshall DidSaveTextDocumentParams")
+		}
+
+		id := params.TextDocument.URL
+		if params.Text != "" {
+			s.m[id].TextDocument.Text = params.Text
+		}
+		return nil, nil
+
 	case "textDocument/hover":
 	case "textDocument/completion":
+	case "textDocument/codeAction":
 
 	default:
 		return nil, errors.Errorf("Method %q not supported", req.Method)
@@ -76,59 +133,18 @@ func (s *Server) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.
 	return nil, nil
 }
 
-type InitializeResult struct {
-	ServerInfo struct {
-		Name    string `json:"name"`
-		Version string `json:"version"`
+var isSchema = regexp.MustCompile(`type (.+?) \{`)
+
+func parse(uri, a string) (interface{}, error) {
+
+	found := isSchema.FindAllString(a, -1)
+
+	if len(found) == 0 {
+		// its query => Name : filename , Input : File content
+		return parser.ParseQuery(&ast.Source{Name: uri, Input: a})
 	}
-	Capabilities ServerCapabilities `json:"capabilities"`
-}
+	// parse it as a schema
 
-type initializeParams struct {
-	ProcessId    int                `json:"processid"`
-	RootURI      string             `json:"rootUri"`
-	Capabilities ClientCapabilities `json:"capabilities"`
-}
+	return parser.ParseSchema(&ast.Source{Name: uri, Input: a})
 
-type ClientCapabilities struct{}
-
-type ServerCapabilities struct {
-	TextDocumentSync          TextDocumentSyncKind `json:"textDocumentSync"`
-	CompletionProvider        CompletionOption     `json:"completionProvider"`
-	HoverProvider             bool                 `json:"hoverProvider"`
-	TypeDefinitionProvider    bool                 `json:"typeDefinitionProvider"`
-	ImplementationProvider    bool                 `json:"implementationProvider"`
-	DocumentHighlightProvider bool                 `json:"documentHighlightProvider"`
-	DocumentSymbolProvider    bool                 `json:"documentSymbolProvider"`
-}
-type TextDocumentSyncKind int
-
-type CompletionOption struct {
-	WorkDoneProgressOption
-	ResolveProvider   bool     `json:"resolveProvider"`
-	TriggerCharacters []string `json:"triggerCharacters"`
-}
-
-type WorkDoneProgressOption struct {
-	WorkDoneProgress bool `json:"workDoneProgress"`
-}
-
-type NoOpErr struct{}
-
-func (NoOpErr) Error() string {
-	return "NoOp"
-}
-
-// it is the parameter that is sent when a textDocument/didOpenFile command is send
-
-type DidOpenTextDocumentParams struct {
-	TextDocument TextDocumentItem `json:"textDocument"`
-}
-
-// it is the document itself
-type TextDocumentItem struct {
-	URI        string `json:"uri"`
-	LanguageID string `json:"languageId"`
-	Version    int    `json:"version"`
-	Text       string `json:"text"` // contents of the file
 }

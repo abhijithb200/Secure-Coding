@@ -1,95 +1,59 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
-
-	"errors"
+	"fmt"
+	"lsp/server"
+	"os"
 
 	"github.com/sourcegraph/jsonrpc2"
 )
 
-const version = "UNTAGGED"
-const (
-	Full TextDocumentSyncKind = iota
-	Incremental
-)
+func main() {
+	server := &server.Server{}
+	defer server.Stop()
 
-type Server struct {
-	isInitialized bool
+	ctx := context.Background()
+	rwc := x{}
+	handler := jsonrpc2.HandlerWithError(server.Handle)
+	stream := jsonrpc2.NewBufferedStream(rwc, jsonrpc2.VSCodeObjectCodec{})
+	conn := jsonrpc2.NewConn(ctx, stream, handler)
+	<-conn.DisconnectNotify() // channel which will close until a connection is diconnected
 }
 
-func (s *Server) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) (interface{}, error) {
+type x struct{}
 
-	switch req.Method {
-	case "initialize":
-		if req.Params == nil {
-			return nil, errors.Errorf("Cannot have nil params for intilize")
-		}
-		var params initializeParams
-		if err := json.Unmarshal(*req.Params, &params); err != nil {
-			return nil, errors.Wrapf(err, "Unable to unmarshal intializeParams")
-		}
+func (x) Read(p []byte) (n int, err error) {
+	return os.Stdin.Read(p)
+}
 
-		retVal := InitializeResult{
-			ServerInfo: struct {
-				Name    string "json:\"name\""
-				Version string "json:\"version\""
-			}{Name: "LSP", Version: "1"},
+func (x) Write(p []byte) (n int, err error) {
+	return os.Stdout.Write(p)
+}
 
-			Capabilities: ServerCapabilities{
-				TextDocumentSync: Full,
-				CompletionProvider: CompletionOption{
-					WorkDoneProgressOption: WorkDoneProgressOption{
-						WorkDoneProgress: true,
-					},
-					ResolveProvider:   false,
-					TriggerCharacters: []string{"{", ":"},
-				},
-			},
-		}
-		return retVal, nil
-
-	case "textDocument/didOpen":
-	case "textDocument/didSave":
-
+func (x) Close() error {
+	var errs listErr
+	if err := os.Stdin.Close(); err != nil {
+		errs = append(errs, err)
 	}
-}
-
-type InitializeResult struct {
-	ServerInfo struct {
-		Name    string `json:"name"`
-		Version string `json:"version"`
+	if err := os.Stdout.Close(); err != nil {
+		errs = append(errs, err)
 	}
-	Capabilities ServerCapabilities `json:"capabilities"`
+	if len(errs) == 1 {
+		return errs[0]
+	}
+	return errs
 }
 
-type initializeParams struct {
-	ProcessId    int                `json:"processid"`
-	RootURI      string             `json:"rootUri"`
-	Capabilities ClientCapabilities `json:"capabilities"`
+type listErr []error
+
+func (l listErr) Error() string {
+	var buf bytes.Buffer
+
+	buf.Write([]byte("Multiple Errors Found: \n"))
+	for _, e := range l {
+		fmt.Fprintf(&buf, "%v\n", e) // format print and write to buf
+	}
+	return buf.String()
 }
-
-type ClientCapabilities struct{}
-
-type ServerCapabilities struct {
-	TextDocumentSync          TextDocumentSyncKind `json:"textDocumentSync"`
-	CompletionProvider        CompletionOption     `json:"completionProvider"`
-	HoverProvider             bool                 `json:"hoverProvider"`
-	TypeDefinitionProvider    bool                 `json:"typeDefinitionProvider"`
-	ImplementationProvider    bool                 `json:"implementationProvider"`
-	DocumentHighlightProvider bool                 `json:"documentHighlightProvider"`
-	DocumentSymbolProvider    bool                 `json:"documentSymbolProvider"`
-}
-
-type CompletionOption struct {
-	WorkDoneProgressOption
-	ResolveProvider   bool     `json:"resolveProvider"`
-	TriggerCharacters []string `json:"triggerCharacters"`
-}
-
-type WorkDoneProgressOption struct {
-	WorkDoneProgress bool `json:"workDoneProgress"`
-}
-
-type TextDocumentSyncKind int
