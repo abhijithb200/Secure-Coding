@@ -19,7 +19,7 @@ type Server struct {
 	isInitialized bool
 }
 
-func (s *Server) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) ([]byte, error) {
+func (s *Server) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) (interface{}, error) {
 
 	switch req.Method {
 	case "initialize":
@@ -31,20 +31,24 @@ func (s *Server) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.
 			return nil, errors.Wrapf(err, "Unable to unmarshal intializeParams")
 		}
 
-		res := InitializeResult{
+		retVal := InitializeResult{
 			ServerInfo: struct {
 				Name    string "json:\"name\""
 				Version string "json:\"version\""
-			}{Name: "LSP", Version: version},
+			}{Name: "LSP", Version: "1"},
+
 			Capabilities: ServerCapabilities{
 				TextDocumentSync: Full,
-				CompletionProvider: {
-					WorkDoneProgressOption:{WorkDoneProgressOption:{
-						WorkDoneProgress:false
-					}},
+				CompletionProvider: CompletionOption{
+					WorkDoneProgressOption: WorkDoneProgressOption{
+						WorkDoneProgress: true,
+					},
+					ResolveProvider:   false,
+					TriggerCharacters: []string{"{", ":"},
 				},
 			},
 		}
+		return retVal, nil
 
 	case "textDocument/didOpen":
 	case "textDocument/didSave":
