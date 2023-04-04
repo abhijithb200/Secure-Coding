@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type Values interface {
@@ -30,6 +31,37 @@ type Root struct {
 	Stmts []Node
 }
 
+type Function struct {
+	ReturnsRef    bool
+	PhpDocComment string
+	FunctionName  Node
+	Stmts         []Node
+}
+
+func (f *Function) Out(argstore ArgStore) Values {
+	for _, r := range f.Stmts {
+		r.Out(ArgStore{})
+	}
+
+	return nil
+}
+
+type FunctionCall struct {
+	Function     *Name
+	ArgumentList Node
+}
+
+func (f *FunctionCall) Out(argstore ArgStore) Values {
+	return nil
+}
+
+type ArgumentList struct {
+}
+
+func (f *ArgumentList) Out(argstore ArgStore) Values {
+	return nil
+}
+
 type Expression struct {
 	Position *Position
 
@@ -48,6 +80,7 @@ type Echo struct {
 }
 
 func (ec *Echo) Out(argstore ArgStore) Values {
+
 	ec.Exprs[0].Out(ArgStore{
 		from: "echo",
 	})
@@ -62,7 +95,7 @@ func vuln_reporter(a *VulnReport) {
 	for _, i := range VulnTracker.taintvar {
 		for k, v := range i {
 			if k == a.some.(TaintSpec).alias {
-				fmt.Println("Pari :", v.spec)
+				fmt.Println("Vulnerable Source :", v.spec)
 			}
 		}
 	}
@@ -87,7 +120,16 @@ type ArrayDimFetchNew struct {
 }
 
 func (a *ArrayDimFetch) Out(argstore ArgStore) Values {
-	return ArrayDimFetchNew{Variable: a.Variable.Out(ArgStore{}).(IdentifierNew).Value, Value: a.Dim.Out(ArgStore{})}
+	x := a.Variable.Out(ArgStore{})
+	y := a.Dim.Out(ArgStore{})
+
+	if reflect.TypeOf(x).String() == "parse.IdentifierNew" {
+		return ArrayDimFetchNew{Variable: x.(IdentifierNew).Value, Value: y}
+	} else if reflect.TypeOf(x).String() == "string" {
+		return ArrayDimFetchNew{Variable: x, Value: y}
+	}
+
+	return nil
 }
 
 type Variable struct {

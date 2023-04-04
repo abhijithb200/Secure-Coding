@@ -55,3 +55,11 @@ $a = $_GET['name'];
 $b = "Name is ".$a;
 echo "I am ".$b;
 ```
+
+```php
+<?php
+function writeMsg() {
+    echo "Hello world!"._GET["name"];
+}
+writeMsg();
+```

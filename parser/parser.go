@@ -1,7 +1,5 @@
 package parser
 
-import "fmt"
-
 type TaintSpec struct {
 	alias string
 	spec  Values
@@ -22,56 +20,48 @@ var VulnTracker *VulnReport = &VulnReport{}
 func Parser() {
 	program := &Root{
 		Stmts: []Node{
-			&Expression{
-				Expr: &Assign{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "a",
-						},
-					},
-					Expression: &ArrayDimFetch{
-						Variable: &Variable{
-							VarName: &Identifier{
-								Value: "_GET",
+			&Function{
+				ReturnsRef:    false,
+				PhpDocComment: "",
+				FunctionName: &Identifier{
+					Value: "writeMsg",
+				},
+				Stmts: []Node{
+					&Echo{
+						Exprs: []Node{
+							&Concat{
+								Left: &String{
+									Value: "\"Hello world!\"",
+								},
+								Right: &ArrayDimFetch{
+									Variable: &ConstFetch{
+										Constant: &Name{
+											Parts: []Node{
+												&NamePart{
+													Value: "_GET",
+												},
+											},
+										},
+									},
+									Dim: &String{
+										Value: "\"name\"",
+									},
+								},
 							},
-						},
-						Dim: &String{
-							Value: "'name'",
 						},
 					},
 				},
 			},
 			&Expression{
-				Expr: &Assign{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "b",
-						},
-					},
-					Expression: &Concat{
-						Left: &String{
-							Value: "\"Name is \"",
-						},
-						Right: &Variable{
-							VarName: &Identifier{
-								Value: "a",
+				Expr: &FunctionCall{
+					Function: &Name{
+						Parts: []Node{
+							&NamePart{
+								Value: "writeMsg",
 							},
 						},
 					},
-				},
-			},
-			&Echo{
-				Exprs: []Node{
-					&Concat{
-						Left: &String{
-							Value: "\"I am \"",
-						},
-						Right: &Variable{
-							VarName: &Identifier{
-								Value: "b",
-							},
-						},
-					},
+					ArgumentList: &ArgumentList{},
 				},
 			},
 		},
@@ -84,7 +74,7 @@ func Parser() {
 		// 	fmt.Println(k, v)
 		// }
 
-		fmt.Println(VulnTracker.taintvar)
+		// fmt.Println(VulnTracker.taintvar)
 		// switch r.(type) Println()
 		// case *Echo:
 		// 	// s := r.(*Echo).Exprs[0]
