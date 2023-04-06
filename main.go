@@ -1,59 +1,36 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"lsp/server"
 	"os"
+
+	"lsp/server"
 
 	"github.com/sourcegraph/jsonrpc2"
 )
 
 func main() {
-	server := &server.Server{}
-	defer server.Stop()
-
-	ctx := context.Background()
-	rwc := x{}
-	handler := jsonrpc2.HandlerWithError(server.Handle)
-	stream := jsonrpc2.NewBufferedStream(rwc, jsonrpc2.VSCodeObjectCodec{})
-	conn := jsonrpc2.NewConn(ctx, stream, handler)
-	<-conn.DisconnectNotify() // channel which will close until a connection is diconnected
+	handler := server.NewHandler()
+	<-jsonrpc2.NewConn(context.Background(), jsonrpc2.NewBufferedStream(stdrwc{}, jsonrpc2.VSCodeObjectCodec{}), handler).DisconnectNotify()
 }
 
-type x struct{}
+type stdrwc struct{}
 
-func (x) Read(p []byte) (n int, err error) {
+func (stdrwc) Read(p []byte) (int, error) {
+	f, _ := os.OpenFile("C:/Users/abhij/OneDrive/Desktop/Test/input.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f.Write(p)
 	return os.Stdin.Read(p)
 }
 
-func (x) Write(p []byte) (n int, err error) {
+func (c stdrwc) Write(p []byte) (int, error) {
+	f, _ := os.OpenFile("C:/Users/abhij/OneDrive/Desktop/Test/output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f.Write(p)
 	return os.Stdout.Write(p)
 }
 
-func (x) Close() error {
-	var errs listErr
+func (c stdrwc) Close() error {
 	if err := os.Stdin.Close(); err != nil {
-		errs = append(errs, err)
+		return err
 	}
-	if err := os.Stdout.Close(); err != nil {
-		errs = append(errs, err)
-	}
-	if len(errs) == 1 {
-		return errs[0]
-	}
-	return errs
-}
-
-type listErr []error
-
-func (l listErr) Error() string {
-	var buf bytes.Buffer
-
-	buf.Write([]byte("Multiple Errors Found: \n"))
-	for _, e := range l {
-		fmt.Fprintf(&buf, "%v\n", e) // format print and write to buf
-	}
-	return buf.String()
+	return os.Stdout.Close()
 }
