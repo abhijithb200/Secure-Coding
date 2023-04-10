@@ -7,8 +7,20 @@ func Test() program {
 	Stmts: []Node{
 		&Echo{
 			Exprs: []Node{
-				&String{
-					Value: "''",
+				&Concat{
+					Left: &String{
+						Value: "\"abhi\"",
+					},
+					Right: &ArrayDimFetch{
+						Variable: &Variable{
+							VarName: &Identifier{
+								Value: "_GET",
+							},
+						},
+						Dim: &String{
+							Value: "'name'",
+						},
+					},
 				},
 			},
 		},

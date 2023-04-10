@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var a string = "helo"
+var a string = ""
 
 // var b *string = &a
 

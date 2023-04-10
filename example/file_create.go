@@ -11,7 +11,7 @@ import (
 
 func main() {
 	src := []byte(`<?php
-	echo '';
+	echo "abhi".$_GET['name'];
 	`)
 
 	var b bytes.Buffer
@@ -19,8 +19,8 @@ func main() {
 	par := php5.NewParser(src, "example.php")
 	par.Parse()
 
-	visitor := visitor.GoDumper{
-		Writer: &b,
+	visitor := visitor.JsonDumper{
+		Writer: os.Stdout,
 	}
 	//
 	rootNode := par.GetRootNode()

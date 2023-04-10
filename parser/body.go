@@ -32,7 +32,6 @@ type Echo struct {
 
 func (ec *Echo) Out() Values {
 	ec.Exprs[0].Out()
-	a = "sandra"
 
 	return nil
 }
