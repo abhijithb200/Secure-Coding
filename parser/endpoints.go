@@ -38,3 +38,13 @@ type NamePart struct {
 func (n *NamePart) Out(argstore ArgStore) Values {
 	return n.Value
 }
+
+type Argument struct {
+	Variadic    bool
+	IsReference bool
+	Expr        Node
+}
+
+func (a *Argument) Out(argstore ArgStore) Values {
+	return a.Expr.Out(ArgStore{})
+}

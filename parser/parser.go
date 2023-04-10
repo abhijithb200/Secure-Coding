@@ -1,8 +1,12 @@
 package parser
 
+import "fmt"
+
 type TaintSpec struct {
 	alias string
 	spec  Values
+
+	scope string
 }
 
 type VulnReport struct {
@@ -12,12 +16,25 @@ type VulnReport struct {
 
 	some Values
 
-	taintvar []map[string]TaintSpec
+	taintvar map[string]TaintSpec
+}
+
+type FuncContainer struct {
+	pos  int
+	evil string
 }
 
 var VulnTracker *VulnReport = &VulnReport{}
+var StmtsNew = map[string]Node{}
+
+var CurrFuncStatus = map[string][]struct {
+	pos  int
+	evil string
+}{}
 
 func Parser() {
+	VulnTracker.taintvar = make(map[string]TaintSpec)
+
 	program := &Root{
 		Stmts: []Node{
 			&Function{
@@ -26,6 +43,26 @@ func Parser() {
 				FunctionName: &Identifier{
 					Value: "writeMsg",
 				},
+				Params: []Node{
+					&Parameter{
+						Variadic: false,
+						ByRef:    false,
+						Variable: &Variable{
+							VarName: &Identifier{
+								Value: "zee",
+							},
+						},
+					},
+					&Parameter{
+						Variadic: false,
+						ByRef:    false,
+						Variable: &Variable{
+							VarName: &Identifier{
+								Value: "zoo",
+							},
+						},
+					},
+				},
 				Stmts: []Node{
 					&Echo{
 						Exprs: []Node{
@@ -33,22 +70,44 @@ func Parser() {
 								Left: &String{
 									Value: "\"Hello world!\"",
 								},
-								Right: &ArrayDimFetch{
-									Variable: &ConstFetch{
-										Constant: &Name{
-											Parts: []Node{
-												&NamePart{
-													Value: "_GET",
-												},
-											},
-										},
-									},
-									Dim: &String{
-										Value: "\"name\"",
+								Right: &Variable{
+									VarName: &Identifier{
+										Value: "zee",
 									},
 								},
 							},
 						},
+					},
+				},
+			},
+			&Expression{
+				Expr: &Assign{
+					Variable: &Variable{
+						VarName: &Identifier{
+							Value: "a",
+						},
+					},
+					Expression: &ArrayDimFetch{
+						Variable: &Variable{
+							VarName: &Identifier{
+								Value: "_GET",
+							},
+						},
+						Dim: &String{
+							Value: "\"name\"",
+						},
+					},
+				},
+			},
+			&Expression{
+				Expr: &Assign{
+					Variable: &Variable{
+						VarName: &Identifier{
+							Value: "b",
+						},
+					},
+					Expression: &String{
+						Value: "\"Abhijith\"",
 					},
 				},
 			},
@@ -61,33 +120,45 @@ func Parser() {
 							},
 						},
 					},
-					ArgumentList: &ArgumentList{},
+					ArgumentList: &ArgumentList{
+						Arguments: []Node{
+							&Argument{
+								Variadic:    false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "a",
+									},
+								},
+							},
+							&Argument{
+								Variadic:    false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "b",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 	}
 	for _, r := range program.Stmts {
 
-		r.Out(ArgStore{})
+		switch r.(type) {
+		case *Function:
+			currFuncName := r.Out(ArgStore{
+				from: "Disable",
+			}).(FunctionNew).FunctionName
 
-		// for k, v := range VulnTracker.taintvar[0] {
-		// 	fmt.Println(k, v)
-		// }
+			StmtsNew[currFuncName] = r
 
-		// fmt.Println(VulnTracker.taintvar)
-		// switch r.(type) Println()
-		// case *Echo:
-		// 	// s := r.(*Echo).Exprs[0]
-		// 	// m := s.(*String)
-		// 	// fmt.Println(m.Value)
-		// 	r.Out()
-
-		// case *Expression:
-		// 	r.Out()
-
-		// default:
-		// 	fmt.Println("no")
-		// }
-
+		case *Expression:
+			r.Out(ArgStore{})
+		}
 	}
+	fmt.Println(VulnTracker.taintvar)
 }

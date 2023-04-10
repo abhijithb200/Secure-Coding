@@ -34,16 +34,44 @@ type Root struct {
 type Function struct {
 	ReturnsRef    bool
 	PhpDocComment string
-	FunctionName  Node
-	Stmts         []Node
+
+	FunctionName Node
+
+	Params []Node
+	Stmts  []Node
+}
+
+type FunctionNew struct {
+	FunctionName string
 }
 
 func (f *Function) Out(argstore ArgStore) Values {
-	for _, r := range f.Stmts {
-		r.Out(ArgStore{})
+	for _, r := range CurrFuncStatus["po"] {
+
+		VulnTracker.taintvar[f.Params[r.pos].Out(ArgStore{}).(string)] = TaintSpec{
+			alias: r.evil,
+			scope: f.FunctionName.Out(ArgStore{}).(IdentifierNew).Value.(string),
+		}
+	}
+	if argstore.from != "Disable" {
+		for _, r := range f.Stmts {
+			r.Out(ArgStore{})
+		}
 	}
 
-	return nil
+	return FunctionNew{
+		FunctionName: f.FunctionName.Out(ArgStore{}).(IdentifierNew).Value.(string),
+	}
+}
+
+type Parameter struct {
+	Variadic bool
+	ByRef    bool
+	Variable Node
+}
+
+func (p *Parameter) Out(argstore ArgStore) Values {
+	return p.Variable.Out(ArgStore{}).(IdentifierNew).Value
 }
 
 type FunctionCall struct {
@@ -52,13 +80,27 @@ type FunctionCall struct {
 }
 
 func (f *FunctionCall) Out(argstore ArgStore) Values {
+	f.ArgumentList.Out(ArgStore{})
 	return nil
 }
 
 type ArgumentList struct {
+	Arguments []Node
 }
 
 func (f *ArgumentList) Out(argstore ArgStore) Values {
+	for i, r := range f.Arguments {
+
+		if _, ok := VulnTracker.taintvar[r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
+			CurrFuncStatus["po"] = append(CurrFuncStatus["po"], struct {
+				pos  int
+				evil string
+			}{
+				pos:  i,
+				evil: r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string),
+			})
+		}
+	}
 	return nil
 }
 
@@ -69,7 +111,13 @@ type Expression struct {
 }
 
 func (e *Expression) Out(argstore ArgStore) Values {
-	e.Expr.Out(ArgStore{})
+	switch e.Expr.(type) {
+	case *FunctionCall:
+		e.Expr.Out(ArgStore{})
+		StmtsNew["writeMsg"].(*Function).Out(ArgStore{})
+	default:
+		e.Expr.Out(ArgStore{})
+	}
 	return nil
 }
 
@@ -92,11 +140,9 @@ func vuln_reporter(a *VulnReport) {
 	fmt.Println("Type :", a.name)
 	fmt.Println("Description :", a.message)
 
-	for _, i := range VulnTracker.taintvar {
-		for k, v := range i {
-			if k == a.some.(TaintSpec).alias {
-				fmt.Println("Vulnerable Source :", v.spec)
-			}
+	for k, v := range VulnTracker.taintvar {
+		if k == a.some.(TaintSpec).alias {
+			fmt.Println("Vulnerable Source :", v.spec)
 		}
 	}
 	fmt.Println("----------------------------------------------------")
@@ -120,10 +166,11 @@ type ArrayDimFetchNew struct {
 }
 
 func (a *ArrayDimFetch) Out(argstore ArgStore) Values {
+
 	x := a.Variable.Out(ArgStore{})
 	y := a.Dim.Out(ArgStore{})
 
-	if reflect.TypeOf(x).String() == "parse.IdentifierNew" {
+	if reflect.TypeOf(x).String() == "parser.IdentifierNew" {
 		return ArrayDimFetchNew{Variable: x.(IdentifierNew).Value, Value: y}
 	} else if reflect.TypeOf(x).String() == "string" {
 		return ArrayDimFetchNew{Variable: x, Value: y}
