@@ -1,25 +1,23 @@
 package main
 
-import "codeguardian/parser"
+import (
+	"fmt"
+	"os/exec"
+)
 
 func main() {
-	// src := []byte(`<?php
-	// 	function writeMsg($zee,$zoo) {
-	// 	  echo "Hello world!".$zee;
-	// 	}
-	// 	$a = $_GET["name"];
-	// 	$b = "Abhijith";
-	// 	writeMsg($a,$b);
-	// 	`)
 
-	// parser := php5.NewParser(src, "example.php")
-	// parser.Parse()
+	fileName := "./layer1/file_create.go"
+	cmd := exec.Command("go", "run", fileName)
+	cmd.CombinedOutput()
 
-	// visitor := visitor.GoDumper{
-	// 	Writer: os.Stdout,
-	// }
-	// //
-	// rootNode := parser.GetRootNode()
-	// rootNode.Walk(&visitor)
-	parser.Parser()
+	fileName = "./layer2/diffmain.go"
+	cmd = exec.Command("go", "run", fileName)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	fmt.Println(string(output))
 }
