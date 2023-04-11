@@ -2,7 +2,7 @@
 
 Description: CodeGuardian is a DevSecOps tool that helps to identify and remediate security vulnerabilities in source code. It is an automated tool that integrates with existing code repositories and performs static code analysis to detect security flaws and vulnerabilities.
 
-Features:
+### Features:
 
 Integration with popular code repositories like GitHub, Bitbucket, etc.
 Automated static code analysis to detect security flaws and vulnerabilities
@@ -11,14 +11,15 @@ Real-time security feedback and vulnerability reports to developers and security
 Integration with popular issue tracking tools like JIRA, Trello, etc. to track and manage security issues
 Customizable security policies and controls for code analysis
 Integration with popular code editors like VSCode, Atom, etc.
-How it works:
+### How it works:
 
 CodeGuardian integrates with the existing code repository used in the SDLC.
 Automated static code analysis is performed to detect security flaws and vulnerabilities.
 Real-time feedback and vulnerability reports are generated and sent to developers and security teams.
 Security policies and controls can be customized for code analysis.
 Integration with popular code editors allows developers to view and remediate vulnerabilities directly within their editor.
-Benefits:
+
+### Benefits:
 
 Early detection of security vulnerabilities in source code, reducing the risk of vulnerabilities and cyber attacks.
 Improved collaboration between developers and security teams.
@@ -62,4 +63,13 @@ function writeMsg() {
     echo "Hello world!"._GET["name"];
 }
 writeMsg();
+```
+
+```php
+function writeMsg($c) {
+    echo "Hello world!".$c;
+}
+
+$a = $_GET["name"];
+writeMsg($a);
 ```

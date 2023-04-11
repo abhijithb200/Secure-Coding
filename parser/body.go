@@ -129,10 +129,42 @@ type Echo struct {
 
 func (ec *Echo) Out(argstore ArgStore) Values {
 
-	ec.Exprs[0].Out(ArgStore{
+	a := ec.Exprs[0].Out(ArgStore{
 		from: "echo",
 	})
+
+	switch a.(type) {
+
+	// adding tainted variable directly on the echo statement
+	case IdentifierNew:
+		for k, v := range VulnTracker.taintvar {
+			if k == a.(IdentifierNew).Value {
+				vuln_reporter(
+					&VulnReport{
+						name:    "Reflected XSS",
+						message: "Found tainted variable" + a.(IdentifierNew).Value.(string) + " directly on the echo statement",
+						some:    v,
+					},
+				)
+			}
+		}
+	}
 	return nil
+}
+
+func VulnSourceResolve(a TaintSpec) {
+	// recursively finding the inner variable with spec
+	for k, v := range VulnTracker.taintvar {
+		if k == a.alias {
+			if v.spec != nil {
+				fmt.Println("Vulnerable Source :", v.spec)
+				return
+			} else {
+				VulnSourceResolve(v)
+			}
+		}
+	}
+
 }
 
 func vuln_reporter(a *VulnReport) {
@@ -140,11 +172,17 @@ func vuln_reporter(a *VulnReport) {
 	fmt.Println("Type :", a.name)
 	fmt.Println("Description :", a.message)
 
-	for k, v := range VulnTracker.taintvar {
-		if k == a.some.(TaintSpec).alias {
-			fmt.Println("Vulnerable Source :", v.spec)
-		}
+	switch a.some.(type) {
+
+	//if it is inside the taintvar map
+	case TaintSpec:
+		VulnSourceResolve(a.some.(TaintSpec))
+
+	// if the source is directly in the echo
+	case ArrayDimFetchNew:
+		fmt.Println("Vulnerable Source :", a.some)
 	}
+
 	fmt.Println("----------------------------------------------------")
 	fmt.Println()
 }

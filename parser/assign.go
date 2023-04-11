@@ -45,14 +45,27 @@ func (a *Assign) Out(argstore ArgStore) Values {
 
 			if x.(IdentifierNew).Value == k {
 
-				VulnTracker.taintvar[argstore.variable] = TaintSpec{
+				if argstore.variable != "" {
+					VulnTracker.taintvar[argstore.variable] = TaintSpec{
+						alias: k,
+						// spec:  v,
+					}
+				}
+			}
+		}
+	}
+
+	if reflect.TypeOf(x).String() == "parser.IdentifierNew" &&
+		reflect.TypeOf(y).String() == "parser.IdentifierNew" {
+
+		for k, _ := range VulnTracker.taintvar {
+			if x.(IdentifierNew).Value == k {
+				VulnTracker.taintvar[y.(IdentifierNew).Value.(string)] = TaintSpec{
 					alias: k,
 					// spec:  v,
 				}
 			}
-
 		}
-
 	}
 
 	return nil

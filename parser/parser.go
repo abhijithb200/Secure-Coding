@@ -1,10 +1,12 @@
 package parser
 
-type TaintSpec struct {
-	alias string
-	spec  Values
+import "fmt"
 
-	scope string
+type TaintSpec struct {
+	alias string // another name for the variable
+	spec  Values // the vulnerable source
+
+	scope string // which function name it is applicable
 }
 
 type VulnReport struct {
@@ -15,11 +17,6 @@ type VulnReport struct {
 	some Values
 
 	taintvar map[string]TaintSpec
-}
-
-type FuncContainer struct {
-	pos  int
-	evil string
 }
 
 var VulnTracker *VulnReport = &VulnReport{}
@@ -48,4 +45,6 @@ func Parser() {
 		}
 
 	}
+
+	fmt.Println(VulnTracker.taintvar)
 }

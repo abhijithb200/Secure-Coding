@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -49,6 +50,8 @@ func (c *Concat) Out(argstore ArgStore) Values {
 					alias: argstore.variable,
 					spec:  b.(ArrayDimFetchNew),
 				}
+
+				fmt.Println(VulnTracker.taintvar)
 			}
 		}
 
@@ -85,24 +88,28 @@ func (c *Concat) Out(argstore ArgStore) Values {
 
 	// Finding $_GET[] or $_POST[] used directly in the echo statement
 
-	if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
+	if argstore.from == "echo" {
+		if reflect.TypeOf(a).String() == "parser.ArrayDimFetchNew" {
 
-		if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
-			vuln_reporter(&VulnReport{
-				name:    "Reflected XSS",
-				message: "Found " + x.(string) + " inside echo with the parameter : " + a.(ArrayDimFetchNew).Value.(string),
-				// position: *c.Position,
-			})
+			if x := a.(ArrayDimFetchNew).Variable; x == "_GET" || x == "_POST" {
+				vuln_reporter(&VulnReport{
+					name:    "Reflected XSS",
+					message: "Found " + x.(string) + " inside echo with the parameter : " + a.(ArrayDimFetchNew).Value.(string),
+					some:    a,
+					// position: *c.Position,
+				})
 
-		}
-	} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
-		if y := b.(ArrayDimFetchNew).Variable; y == "_GET" || y == "_POST" {
-			vuln_reporter(&VulnReport{
-				name:    "Reflected XSS",
-				message: "Found " + y.(string) + " inside echo with the parameter : " + b.(ArrayDimFetchNew).Value.(string),
-				// position: *c.Position,
-			})
+			}
+		} else if reflect.TypeOf(b).String() == "parser.ArrayDimFetchNew" {
+			if y := b.(ArrayDimFetchNew).Variable; y == "_GET" || y == "_POST" {
+				vuln_reporter(&VulnReport{
+					name:    "Reflected XSS",
+					message: "Found " + y.(string) + " inside echo with the parameter : " + b.(ArrayDimFetchNew).Value.(string),
+					some:    b,
+					// position: *c.Position,
+				})
 
+			}
 		}
 	}
 

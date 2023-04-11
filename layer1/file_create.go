@@ -11,8 +11,11 @@ import (
 
 func main() {
 	src := []byte(`<?php
-	$c = $_GET['name'];
- 	echo "Name is".$c;
+	function writeMsg($c) {
+    	echo "Hello world!".$c;
+	}
+	$a = $_GET["name"];
+	writeMsg($a);
 	`)
 
 	var b bytes.Buffer
