@@ -53,7 +53,7 @@ func Test() program {
 						},
 					},
 					Dim: &String{
-						Value: "\"vila\"",
+						Value: "\"sasi\"",
 					},
 				},
 			},

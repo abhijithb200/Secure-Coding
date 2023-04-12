@@ -3,24 +3,33 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/z7zmey/php-parser/php5"
 	"github.com/z7zmey/php-parser/visitor"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func main() {
-	src := []byte(`<?php
-	function writeMsg($c) {
-    	echo "Hello world!".$c;
+type RabbitConn struct {
+	conn *amqp.Connection
+
+	text []byte
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Panicf("%s: %s", msg, err)
 	}
-	$a = $_GET["name"];
-	writeMsg($a);
-	`)
+}
+
+func (r *RabbitConn) FileCreate() {
+	src := r.text
 
 	var b bytes.Buffer
 
-	par := php5.NewParser(src, "example.php")
+	par := php5.NewParser(src, "")
 	par.Parse()
 
 	visitor := visitor.GoDumper{
@@ -56,4 +65,57 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Println("Written")
+
+}
+
+func (r *RabbitConn) ReceiveFrom() {
+	ch, err := r.conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		"one", // name
+		false, // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	failOnError(err, "Failed to register a consumer")
+
+	var forever chan struct{}
+
+	go func() {
+		for d := range msgs {
+			log.Printf("Received a message: %s", d.Body)
+			r.text = d.Body
+			r.FileCreate()
+		}
+	}()
+
+	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	<-forever
+}
+
+func main() {
+	con, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer con.Close()
+
+	d := RabbitConn{
+		conn: con,
+	}
+	d.ReceiveFrom()
 }

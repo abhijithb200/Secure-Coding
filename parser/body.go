@@ -178,7 +178,7 @@ func vuln_reporter(a *VulnReport) {
 	case TaintSpec:
 		VulnSourceResolve(a.some.(TaintSpec))
 
-	// if the source is directly in the echo
+	// if the vuln source is directly in the echo
 	case ArrayDimFetchNew:
 		fmt.Println("Vulnerable Source :", a.some)
 	}
