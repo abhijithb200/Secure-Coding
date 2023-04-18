@@ -5,45 +5,11 @@ type program *Root
 func Test() program {
     p:= &Root{
 	Stmts: []Node{
-		&Function{
-			ReturnsRef: false,
-			PhpDocComment: "",
-			FunctionName: &Identifier{
-				Value: "writeMsg",
-			},
-			Params: []Node{
-				&Parameter{
-					ByRef: false,
-					Variadic: false,
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "c",
-						},
-					},
-				},
-			},
-			Stmts: []Node{
-				&Echo{
-					Exprs: []Node{
-						&Concat{
-							Left: &String{
-								Value: "\"Hello world!\"",
-							},
-							Right: &Variable{
-								VarName: &Identifier{
-									Value: "c",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
 		&Expression{
 			Expr: &Assign{
 				Variable: &Variable{
 					VarName: &Identifier{
-						Value: "a",
+						Value: "file",
 					},
 				},
 				Expression: &ArrayDimFetch{
@@ -53,29 +19,21 @@ func Test() program {
 						},
 					},
 					Dim: &String{
-						Value: "\"vila\"",
+						Value: "'file'",
 					},
 				},
 			},
 		},
 		&Expression{
-			Expr: &FunctionCall{
-				Function: &Name{
+			Expr: &Include{
+				Expr: &Encapsed{
 					Parts: []Node{
-						&NamePart{
-							Value: "writeMsg",
+						&EncapsedStringPart{
+							Value: "pages/",
 						},
-					},
-				},
-				ArgumentList: &ArgumentList{
-					Arguments: []Node{
-						&Argument{
-							Variadic: false,
-							IsReference: false,
-							Expr: &Variable{
-								VarName: &Identifier{
-									Value: "a",
-								},
+						&Variable{
+							VarName: &Identifier{
+								Value: "file",
 							},
 						},
 					},

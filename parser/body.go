@@ -80,8 +80,23 @@ type FunctionCall struct {
 }
 
 func (f *FunctionCall) Out(argstore ArgStore) Values {
-	f.ArgumentList.Out(ArgStore{})
-	return nil
+	r := f.ArgumentList.Out(ArgStore{})
+
+	// if the function name is exec and the argument is in the tainted list
+	if r != nil {
+		if f.Function.Parts[0].Out(ArgStore{}).(string) == "exec" {
+
+			vuln_reporter(&VulnReport{
+				name:    "OS Command Injection",
+				message: "Found " + r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside exec",
+				some:    VulnTracker.taintvar[r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string)],
+				// position: *c.Position,
+			})
+
+		}
+	}
+
+	return ""
 }
 
 type ArgumentList struct {
@@ -91,6 +106,7 @@ type ArgumentList struct {
 func (f *ArgumentList) Out(argstore ArgStore) Values {
 	for i, r := range f.Arguments {
 
+		// if tainted value is in the argument
 		if _, ok := VulnTracker.taintvar[r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
 			CurrFuncStatus["po"] = append(CurrFuncStatus["po"], struct {
 				pos  int
@@ -99,6 +115,8 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 				pos:  i,
 				evil: r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string),
 			})
+
+			return r
 		}
 	}
 	return nil
@@ -246,4 +264,53 @@ type ConstFetch struct {
 
 func (c *ConstFetch) Out(argstore ArgStore) Values {
 	return c.Constant.Out(ArgStore{})
+}
+
+// Local file inclusion
+
+type Include struct {
+	Expr Node
+}
+
+func (i *Include) Out(argstore ArgStore) Values {
+	a := i.Expr.Out(ArgStore{})
+
+	// encapsed find the tainted variable and send back the variable
+	if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
+		vuln_reporter(&VulnReport{
+			name:    "Local File Inclusion",
+			message: "Found " + a.(IdentifierNew).Value.(string) + " inside includes",
+			some:    VulnTracker.taintvar[a.(IdentifierNew).Value.(string)],
+			// position: *c.Position,
+		})
+	}
+
+	return ""
+}
+
+type Encapsed struct {
+	Parts []Node
+}
+
+func (e *Encapsed) Out(argstore ArgStore) Values {
+
+	for _, i := range e.Parts {
+
+		a := i.Out(ArgStore{})
+		//if tainted variable is seen inside Encapsed return the value
+		if reflect.TypeOf(a).String() == "parser.IdentifierNew" {
+			if _, ok := VulnTracker.taintvar[a.(IdentifierNew).Value.(string)]; ok {
+				return a
+			}
+		}
+	}
+	return ""
+}
+
+type EncapsedStringPart struct {
+	Value string
+}
+
+func (e *EncapsedStringPart) Out(argstore ArgStore) Values {
+	return e.Value
 }

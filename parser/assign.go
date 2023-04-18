@@ -30,7 +30,7 @@ func (a *Assign) Out(argstore ArgStore) Values {
 
 		if b := x.(ArrayDimFetchNew).Variable; b == "_GET" || b == "_POST" {
 			VulnTracker.taintvar[y.(IdentifierNew).Value.(string)] = TaintSpec{
-				alias: "",
+				alias: y.(IdentifierNew).Value.(string),
 				spec:  x.(ArrayDimFetchNew),
 			}
 		}

@@ -73,3 +73,19 @@ function writeMsg($c) {
 $a = $_GET["name"];
 writeMsg($a);
 ```
+
+## OS command injection
+
+```php
+$command = "ls ".$_GET['modifiers'];
+$output = exec($command);
+```
+
+## CSRF detection
+
+1. Identify all instances of form submissions or AJAX requests in the code.
+2. Check each form or AJAX request for the presence of a CSRF token.
+3. Check whether the CSRF token is generated on the server-side or on the client-side. If it is generated on the server-side, it is likely not vulnerable to CSRF attacks. If it is generated on the client-side, it is potentially vulnerable to CSRF attacks.
+4. Check whether the CSRF token is included in the request data (e.g., in the POST or GET parameters). If it is not included in the request data, the request is potentially vulnerable to CSRF attacks.
+5. Check whether the request method is GET or HEAD. These methods should not modify data on the server-side, so if the CSRF token is not included in the request data, the request may not be vulnerable to CSRF attacks.
+6. If the request method is POST, PUT, or DELETE, and the CSRF token is included in the request data, the request is potentially vulnerable to CSRF attacks.
