@@ -11,6 +11,7 @@ Real-time security feedback and vulnerability reports to developers and security
 Integration with popular issue tracking tools like JIRA, Trello, etc. to track and manage security issues
 Customizable security policies and controls for code analysis
 Integration with popular code editors like VSCode, Atom, etc.
+
 ### How it works:
 
 CodeGuardian integrates with the existing code repository used in the SDLC.
@@ -79,6 +80,17 @@ writeMsg($a);
 ```php
 $command = "ls ".$_GET['modifiers'];
 $output = exec($command);
+```
+
+## Hardcoded credentials
+
+```php
+$servername = "localhost";
+$username = "username";
+$password = "password";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password);
 ```
 
 ## CSRF detection

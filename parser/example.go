@@ -9,31 +9,81 @@ func Test() program {
 			Expr: &Assign{
 				Variable: &Variable{
 					VarName: &Identifier{
-						Value: "file",
+						Value: "servername",
 					},
 				},
-				Expression: &ArrayDimFetch{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "_GET",
-						},
-					},
-					Dim: &String{
-						Value: "'file'",
-					},
+				Expression: &String{
+					Value: "\"localhost\"",
 				},
 			},
 		},
 		&Expression{
-			Expr: &Include{
-				Expr: &Encapsed{
-					Parts: []Node{
-						&EncapsedStringPart{
-							Value: "pages/",
+			Expr: &Assign{
+				Variable: &Variable{
+					VarName: &Identifier{
+						Value: "username",
+					},
+				},
+				Expression: &String{
+					Value: "\"username\"",
+				},
+			},
+		},
+		&Expression{
+			Expr: &Assign{
+				Variable: &Variable{
+					VarName: &Identifier{
+						Value: "password",
+					},
+				},
+				Expression: &String{
+					Value: "\"password\"",
+				},
+			},
+		},
+		&Expression{
+			Expr: &Assign{
+				Variable: &Variable{
+					VarName: &Identifier{
+						Value: "conn",
+					},
+				},
+				Expression: &FunctionCall{
+					Function: &Name{
+						Parts: []Node{
+							&NamePart{
+								Value: "mysqli_connect",
+							},
 						},
-						&Variable{
-							VarName: &Identifier{
-								Value: "file",
+					},
+					ArgumentList: &ArgumentList{
+						Arguments: []Node{
+							&Argument{
+								Variadic: false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "servername",
+									},
+								},
+							},
+							&Argument{
+								Variadic: false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "username",
+									},
+								},
+							},
+							&Argument{
+								Variadic: false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "password",
+									},
+								},
 							},
 						},
 					},

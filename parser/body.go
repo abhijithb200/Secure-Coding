@@ -80,7 +80,9 @@ type FunctionCall struct {
 }
 
 func (f *FunctionCall) Out(argstore ArgStore) Values {
-	r := f.ArgumentList.Out(ArgStore{})
+	r := f.ArgumentList.Out(ArgStore{
+		variable: f.Function.Parts[0].Out(ArgStore{}).(string),
+	})
 
 	// if the function name is exec and the argument is in the tainted list
 	if r != nil {
@@ -96,7 +98,7 @@ func (f *FunctionCall) Out(argstore ArgStore) Values {
 		}
 	}
 
-	return ""
+	return 0
 }
 
 type ArgumentList struct {
@@ -119,6 +121,21 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 			return r
 		}
 	}
+
+	if argstore.variable == "mysqli_connect"{
+
+		// check for third argument(password for connection) is in allvar[] or not
+		if _,ok := VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok{
+			vuln_reporter(&VulnReport{
+				name:    "Hardcoded Credentials",
+				message: "Found " + f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_connect",
+				some:    VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)],
+				// position: *c.Position,
+			})
+		}
+
+	}
+
 	return nil
 }
 
@@ -184,6 +201,20 @@ func VulnSourceResolve(a TaintSpec) {
 	}
 
 }
+func VarSourceResolve(a TaintSpec) {
+	// recursively finding the inner variable with spec
+	for k, v := range VulnTracker.allvar {
+		if k == a.alias {
+			if v.spec != nil {
+				fmt.Println("Vulnerable Source :", v.spec)
+				return
+			} else {
+				VulnSourceResolve(v)
+			}
+		}
+	}
+
+}
 
 func vuln_reporter(a *VulnReport) {
 	fmt.Print("[!]Vulnerability Found on line ", a.position.StartLine, "\n")
@@ -195,6 +226,8 @@ func vuln_reporter(a *VulnReport) {
 	//if it is inside the taintvar map
 	case TaintSpec:
 		VulnSourceResolve(a.some.(TaintSpec))
+		VarSourceResolve(a.some.(TaintSpec))
+
 
 	// if the vuln source is directly in the echo
 	case ArrayDimFetchNew:
@@ -313,4 +346,14 @@ type EncapsedStringPart struct {
 
 func (e *EncapsedStringPart) Out(argstore ArgStore) Values {
 	return e.Value
+}
+
+// CSRF Protection
+
+type InlineHtml struct {
+	Value string
+}
+
+func (i *InlineHtml) Out(argstore ArgStore) Values {
+	return i.Value
 }

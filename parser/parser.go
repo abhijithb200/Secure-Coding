@@ -17,6 +17,7 @@ type VulnReport struct {
 	some Values
 
 	taintvar map[string]TaintSpec
+	allvar map[string]TaintSpec
 }
 
 var VulnTracker *VulnReport = &VulnReport{}
@@ -29,6 +30,7 @@ var CurrFuncStatus = map[string][]struct {
 
 func Parser() {
 	VulnTracker.taintvar = make(map[string]TaintSpec)
+	VulnTracker.allvar = make(map[string]TaintSpec)
 
 	program := Test()
 	for _, r := range program.Stmts {
@@ -47,4 +49,5 @@ func Parser() {
 	}
 
 	fmt.Println(VulnTracker.taintvar)
+	fmt.Println(VulnTracker.allvar)
 }

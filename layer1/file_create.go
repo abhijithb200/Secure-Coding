@@ -120,8 +120,13 @@ func main() {
 	// d.ReceiveFrom()
 
 	src := []byte(`<?php
-	$file = $_GET['file'];
-	include("pages/$file");
+	<?php
+$servername = "localhost";
+$username = "username";
+$password = "password";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password);
 	`)
 
 	FileCreate(src)

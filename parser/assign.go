@@ -25,6 +25,18 @@ func (a *Assign) Out(argstore ArgStore) Values {
 			variable: y.(IdentifierNew).Value.(string),
 		})
 
+
+	// checking for hardcoded password
+	if reflect.TypeOf(x).String() == "string" {
+		// fmt.Println(y.(IdentifierNew).Value.(string),x)
+
+		VulnTracker.allvar[y.(IdentifierNew).Value.(string)] = TaintSpec{
+			alias: y.(IdentifierNew).Value.(string),
+			spec: x,
+		}
+	}
+
+
 	// if any variable accept value from _GET or _POST add to the tainted array list
 	if reflect.TypeOf(x).String() == "parser.ArrayDimFetchNew" {
 
@@ -67,6 +79,8 @@ func (a *Assign) Out(argstore ArgStore) Values {
 			}
 		}
 	}
+
+	
 
 	return nil
 }
