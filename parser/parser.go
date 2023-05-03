@@ -28,6 +28,11 @@ var CurrFuncStatus = map[string][]struct {
 	evil string
 }{}
 
+// add all the ArrayDim to the slice
+var CSRFlist []string 
+
+
+
 func Parser() {
 	VulnTracker.taintvar = make(map[string]TaintSpec)
 	VulnTracker.allvar = make(map[string]TaintSpec)
@@ -50,4 +55,19 @@ func Parser() {
 
 	fmt.Println(VulnTracker.taintvar)
 	fmt.Println(VulnTracker.allvar)
+	fmt.Println(CSRFlist)
+
+	var CSRFStatus bool = false;
+	for _,r :=   range CSRFlist {
+	if r == "csrf_token" {
+		CSRFStatus = true
+	}
+	}
+	if !CSRFStatus {
+		vuln_reporter(
+			&VulnReport{
+				name:    "CSRF token missing",
+			},
+		)
+	}
 }

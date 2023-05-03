@@ -259,6 +259,9 @@ func (a *ArrayDimFetch) Out(argstore ArgStore) Values {
 	x := a.Variable.Out(ArgStore{})
 	y := a.Dim.Out(ArgStore{})
 
+	CSRFlist = append(CSRFlist,y.(string) )
+
+
 	if reflect.TypeOf(x).String() == "parser.IdentifierNew" {
 		return ArrayDimFetchNew{Variable: x.(IdentifierNew).Value, Value: y}
 	} else if reflect.TypeOf(x).String() == "string" {

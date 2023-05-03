@@ -121,12 +121,9 @@ func main() {
 
 	src := []byte(`<?php
 	<?php
-$servername = "localhost";
-$username = "username";
-$password = "password";
-
-// Create connection
-$conn = mysqli_connect($servername, $username, $password);
+$servername = $_GET["servername"];
+$username = $_GET["username"];
+$password = $POST["password"];
 	`)
 
 	FileCreate(src)

@@ -12,8 +12,15 @@ func Test() program {
 						Value: "servername",
 					},
 				},
-				Expression: &String{
-					Value: "\"localhost\"",
+				Expression: &ArrayDimFetch{
+					Variable: &Variable{
+						VarName: &Identifier{
+							Value: "_GET",
+						},
+					},
+					Dim: &String{
+						Value: "\"servername\"",
+					},
 				},
 			},
 		},
@@ -24,8 +31,15 @@ func Test() program {
 						Value: "username",
 					},
 				},
-				Expression: &String{
-					Value: "\"username\"",
+				Expression: &ArrayDimFetch{
+					Variable: &Variable{
+						VarName: &Identifier{
+							Value: "_GET",
+						},
+					},
+					Dim: &String{
+						Value: "\"username\"",
+					},
 				},
 			},
 		},
@@ -36,56 +50,14 @@ func Test() program {
 						Value: "password",
 					},
 				},
-				Expression: &String{
-					Value: "\"password\"",
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "conn",
-					},
-				},
-				Expression: &FunctionCall{
-					Function: &Name{
-						Parts: []Node{
-							&NamePart{
-								Value: "mysqli_connect",
-							},
+				Expression: &ArrayDimFetch{
+					Variable: &Variable{
+						VarName: &Identifier{
+							Value: "_POST",
 						},
 					},
-					ArgumentList: &ArgumentList{
-						Arguments: []Node{
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "servername",
-									},
-								},
-							},
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "username",
-									},
-								},
-							},
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "password",
-									},
-								},
-							},
-						},
+					Dim: &String{
+						Value: "\"password\"",
 					},
 				},
 			},
