@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -185,57 +184,6 @@ func (ec *Echo) Out(argstore ArgStore) Values {
 		}
 	}
 	return nil
-}
-
-func VulnSourceResolve(a TaintSpec) {
-	// recursively finding the inner variable with spec
-	for k, v := range VulnTracker.taintvar {
-		if k == a.alias {
-			if v.spec != nil {
-				fmt.Println("Vulnerable Source :", v.spec)
-				return
-			} else {
-				VulnSourceResolve(v)
-			}
-		}
-	}
-
-}
-func VarSourceResolve(a TaintSpec) {
-	// recursively finding the inner variable with spec
-	for k, v := range VulnTracker.allvar {
-		if k == a.alias {
-			if v.spec != nil {
-				fmt.Println("Vulnerable Source :", v.spec)
-				return
-			} else {
-				VulnSourceResolve(v)
-			}
-		}
-	}
-
-}
-
-func vuln_reporter(a *VulnReport) {
-	fmt.Print("[!]Vulnerability Found on line ", a.position.StartLine, "\n")
-	fmt.Println("Type :", a.name)
-	fmt.Println("Description :", a.message)
-
-	switch a.some.(type) {
-
-	//if it is inside the taintvar map
-	case TaintSpec:
-		VulnSourceResolve(a.some.(TaintSpec))
-		VarSourceResolve(a.some.(TaintSpec))
-
-
-	// if the vuln source is directly in the echo
-	case ArrayDimFetchNew:
-		fmt.Println("Vulnerable Source :", a.some)
-	}
-
-	fmt.Println("----------------------------------------------------")
-	fmt.Println()
 }
 
 /*

@@ -9,7 +9,7 @@ func Test() program {
 			Expr: &Assign{
 				Variable: &Variable{
 					VarName: &Identifier{
-						Value: "servername",
+						Value: "a",
 					},
 				},
 				Expression: &ArrayDimFetch{
@@ -19,45 +19,21 @@ func Test() program {
 						},
 					},
 					Dim: &String{
-						Value: "\"servername\"",
+						Value: "'name'",
 					},
 				},
 			},
 		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "username",
+		&Echo{
+			Exprs: []Node{
+				&Concat{
+					Left: &String{
+						Value: "\"Name is\"",
 					},
-				},
-				Expression: &ArrayDimFetch{
-					Variable: &Variable{
+					Right: &Variable{
 						VarName: &Identifier{
-							Value: "_GET",
+							Value: "a",
 						},
-					},
-					Dim: &String{
-						Value: "\"username\"",
-					},
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "password",
-					},
-				},
-				Expression: &ArrayDimFetch{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "_POST",
-						},
-					},
-					Dim: &String{
-						Value: "\"password\"",
 					},
 				},
 			},

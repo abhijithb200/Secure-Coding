@@ -121,9 +121,8 @@ func main() {
 
 	src := []byte(`<?php
 	<?php
-$servername = $_GET["servername"];
-$username = $_GET["username"];
-$password = $POST["password"];
+	$a = $_GET['name'];
+	echo "Name is".$a;
 	`)
 
 	FileCreate(src)
