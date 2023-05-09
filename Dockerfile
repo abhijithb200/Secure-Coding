@@ -23,6 +23,6 @@ RUN git clone https://github.com/abhijithb200/Secure-Coding.git --branch xss --s
 
 WORKDIR /tmp/xss
 
-RUN pip3 install requests
+RUN pip3 install -r requirements.txt
 
 CMD ["python3", "scanner.py"]
