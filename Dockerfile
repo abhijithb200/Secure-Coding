@@ -19,10 +19,10 @@ RUN unzip $CHROMEDRIVER_DIR/chromedriver* -d $CHROMEDRIVER_DIR
 # Put Chromedriver into the PATH
 ENV PATH $CHROMEDRIVER_DIR:$PATH
 
-RUN git clone https://github.com/abhijithb200/Secure-Coding.git --branch xss --single-branch xss
+RUN git clone https://github.com/abhijithb200/Secure-Coding.git --branch xss --single-branch /tmp/xss
 
-WORKDIR /tmp/traxss
+WORKDIR /tmp/xss
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install requests
 
-CMD ["python3", "traxss.py"]
+CMD ["python3", "scanner.py"]

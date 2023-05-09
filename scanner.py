@@ -1,5 +1,4 @@
 import sys, requests, json, urllib, os,time
-from crayons import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException, ElementNotInteractableException, TimeoutException
@@ -100,13 +99,13 @@ class Scanner:
 
         return
 
-s = Scanner("https://xss-game.appspot.com/level1/frame")
+s = Scanner("http://codeguardian-serv/index.php")
 s.setup()
 
 while True:
-    if os.getenv("GitHash") != s.get_hash(): #changed
+    if os.getenv("GITHASH") != s.get_hash(): #changed
         print("Changed")
-        os.environ["GitHash"] = s.get_hash()
+        os.environ["GITHASH"] = s.get_hash()
         s.run_on_url()
     print("Not changed")
     time.sleep(5)
