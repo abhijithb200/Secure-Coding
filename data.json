@@ -1,0 +1,30 @@
+[
+  {
+    "type": "Reflected XSS",
+    "source": {
+      "value": "name",
+      "varible": "_GET"
+    }
+  },
+  {
+    "type": "Reflected XSS",
+    "source": {
+      "value": "age",
+      "varible": "_GET"
+    }
+  },
+  {
+    "type": "XSS",
+    "source": {
+      "value": "dishoo",
+      "varible": "_GET"
+    }
+  },
+  {
+    "type": "Reflected XSS",
+    "source": {
+      "value": "address",
+      "varible": "_GET"
+    }
+  }
+]
