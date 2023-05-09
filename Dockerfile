@@ -19,7 +19,7 @@ RUN unzip $CHROMEDRIVER_DIR/chromedriver* -d $CHROMEDRIVER_DIR
 # Put Chromedriver into the PATH
 ENV PATH $CHROMEDRIVER_DIR:$PATH
 
-RUN git clone https://github.com/abhijithb200/traxss.git /tmp/traxss
+RUN git clone https://github.com/abhijithb200/Secure-Coding.git --branch xss --single-branch xss
 
 WORKDIR /tmp/traxss
 
