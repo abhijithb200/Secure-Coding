@@ -35,7 +35,7 @@ class Scanner:
     def __init__(self, url):
         self.payloads = get_payloads_from_vectors()
         self.url = url
-        self.codeguardianurl = "http://codeguardian-serv"
+        self.codeguardianurl = "http://codeguardian-serv/PHP-demo.git"
         self.params = self.get_params()
         self.base_url = get_base_url(self.url)
       
@@ -99,7 +99,7 @@ class Scanner:
 
         return
 
-s = Scanner("http://codeguardian-serv/index.php")
+s = Scanner("http://codeguardian-serv/PHP-demo.git/index.php")
 s.setup()
 
 while True:
