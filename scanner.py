@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 import json
 import json,urllib.request
-
+from email_send import email_sender
 
 def get_payloads_from_vectors():
     payloads = []
@@ -95,6 +95,7 @@ class Scanner:
                 vuln_url = self.query_scanner(payload)
                 if vuln_url:
                     print("Detected",vuln_url)
+                    email_sender(vuln_url) 
                     break
 
         return
@@ -109,3 +110,4 @@ while True:
         s.run_on_url()
     print("Not changed")
     time.sleep(5)
+
