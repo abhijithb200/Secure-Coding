@@ -19,7 +19,7 @@ func Test() program {
 						},
 					},
 					Dim: &String{
-						Value: "'name'",
+						Value: "'now'",
 					},
 				},
 			},

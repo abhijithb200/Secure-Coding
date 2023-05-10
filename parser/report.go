@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -17,7 +16,7 @@ type Report struct {
 	Source AllVulns `json:"source"`
 }
 
-type VulnStore []Report
+var VulnStore []Report
 
 // global variable to handle the recursive functions data
 var z Values 
@@ -82,10 +81,10 @@ func vuln_reporter(a *VulnReport) {
 				Variable: z.(ArrayDimFetchNew).Variable.(string),
 			},
 		}
-		p,_ := json.Marshal(v)
-		
-		fmt.Println(string(p))
+		VulnStore = append(VulnStore, v)
+	
 	}
+
 	
 
 	// nullify the global variable

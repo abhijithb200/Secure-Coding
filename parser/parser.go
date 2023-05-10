@@ -1,6 +1,10 @@
 package parser
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
 
 type TaintSpec struct {
 	alias string // another name for the variable
@@ -31,9 +35,14 @@ var CurrFuncStatus = map[string][]struct {
 // add all the ArrayDim to the slice
 var CSRFlist []string 
 
+type FinalReport struct {
+	Hash string 	`json:"hash"`
+	Vulns []Report	`json:"vulns"`
+}
 
 
-func Parser() {
+
+func Parser(hash string) {
 	VulnTracker.taintvar = make(map[string]TaintSpec)
 	VulnTracker.allvar = make(map[string]TaintSpec)
 
@@ -53,9 +62,27 @@ func Parser() {
 
 	}
 
-	fmt.Println(VulnTracker.taintvar)
-	fmt.Println(VulnTracker.allvar)
-	fmt.Println(CSRFlist)
+	b := FinalReport{
+		Hash: hash,
+		Vulns: VulnStore,
+	}
+	p,_ := json.Marshal(b)
+	fmt.Println(string(p))
+
+	f, err := os.Create("../source/Codeguardian.json")
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	// Write the package declaration to the file
+	_, err = fmt.Fprintf(f, string(p))
+	if err != nil {
+		panic(err)
+	}
+
+
 
 	var CSRFStatus bool = false;
 	for _,r :=   range CSRFlist {

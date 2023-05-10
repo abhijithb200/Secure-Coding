@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -40,7 +41,7 @@ func FileCreate(src []byte) {
 	rootNode := par.GetRootNode()
 	rootNode.Walk(&visitor)
 
-	f, err := os.Create("./parser/example.go")
+	f, err := os.Create("../parser/example.go")
 	if err != nil {
 		panic(err)
 	}
@@ -119,11 +120,12 @@ func main() {
 	// }
 	// d.ReceiveFrom()
 
-	src := []byte(`<?php
-	<?php
-	$a = $_GET['name'];
-	echo "Name is".$a;
-	`)
+	// src := []byte(`<?php
+	// <?php
+	// $a = $_GET['name'];
+	// echo "Name is".$a;
+	// `)
 
+	src, _ := ioutil.ReadFile("index.php")
 	FileCreate(src)
 }
