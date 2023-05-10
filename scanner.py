@@ -35,7 +35,7 @@ class Scanner:
     def __init__(self, url):
         self.payloads = get_payloads_from_vectors()
         self.url = url
-        self.codeguardianurl = os.getenv("Codeguarian")
+        self.codeguardianurl = "http://codeguardian-serv"
         self.params = self.get_params()
         self.base_url = get_base_url(self.url)
       
