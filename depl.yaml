@@ -21,7 +21,7 @@ spec:
           mountPath: /data
         env:
         - name: GIT_SYNC_REPO
-          value: "https://github.com/abhijithb200/investigator.git" ##repo-path-you-want-to-clone
+          value: "https://github.com/abhijithb200/PHP-demo.git" ##repo-path-you-want-to-clone
         - name: GIT_SYNC_BRANCH
           value: "main" ##repo-branch
         - name: GIT_SYNC_ROOT
@@ -41,6 +41,11 @@ spec:
         volumeMounts:
         - mountPath: "/var/www/html/"
           name: www-data
+      - name: xssattack
+        image: sherloc/codeguardian-xss:1.4
+        env:
+        - name: GITHASH
+          value: "thisisafakegithash"
       volumes:
       - name: www-data
         emptyDir: {}
