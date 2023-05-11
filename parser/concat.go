@@ -125,7 +125,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 
 				if x == k {
 					vuln_reporter(&VulnReport{
-						name:    "Reflected XSS ",
+						name:    "Reflected XSS",
 						message: "Found Tainted value " + x.(string) + " inside echo",
 						some:    v,
 						// position: *c.Position,
@@ -140,7 +140,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 			for k, v := range VulnTracker.taintvar {
 				if y == k {
 					vuln_reporter(&VulnReport{
-						name:    "Reflected XSS ",
+						name:    "Reflected XSS",
 						message: "Found Tainted value  inside echo",
 						some:    v,
 						// position: *c.Position,
