@@ -17,6 +17,7 @@ type Report struct {
 }
 
 var VulnStore []Report
+var VulnOutput string
 
 // global variable to handle the recursive functions data
 var z Values
@@ -26,7 +27,7 @@ func VulnSourceResolve(a TaintSpec) {
 	for k, v := range VulnTracker.taintvar {
 		if k == a.alias {
 			if v.spec != nil {
-				fmt.Println("Vulnerable Source :", v.spec)
+				VulnOutput+= fmt.Sprintln("Vulnerable Source :", v.spec)
 				z = v.spec
 				return
 			} else {
@@ -41,7 +42,7 @@ func VarSourceResolve(a TaintSpec) {
 	for k, v := range VulnTracker.allvar {
 		if k == a.alias {
 			if v.spec != nil {
-				fmt.Println("Vulnerable Source :", v.spec)
+				VulnOutput+= fmt.Sprintln("Vulnerable Source :", v.spec)
 				return
 			} else {
 				VulnSourceResolve(v)
@@ -52,9 +53,9 @@ func VarSourceResolve(a TaintSpec) {
 }
 
 func vuln_reporter(a *VulnReport) {
-	fmt.Print("[!]Vulnerability Found on line ", a.position.StartLine, "\n")
-	fmt.Println("Type :", a.name)
-	fmt.Println("Description :", a.message)
+	VulnOutput +=  fmt.Sprintln("[!]Vulnerability Found on line ", a.position.StartLine)
+	VulnOutput+= fmt.Sprintln("Type :", a.name)
+	VulnOutput+= fmt.Sprintln("Description :", a.message)
 
 	switch a.some.(type) {
 
@@ -66,7 +67,7 @@ func vuln_reporter(a *VulnReport) {
 	// if the vuln source is directly in the echo
 	case ArrayDimFetchNew:
 		z = a.some
-		fmt.Println("Vulnerable Source :", a.some)
+		VulnOutput+= fmt.Sprintln("Vulnerable Source :", a.some)
 	}
 
 	if a.name == "Reflected XSS" {
@@ -83,6 +84,6 @@ func vuln_reporter(a *VulnReport) {
 
 	// nullify the global variable
 	z = 0
-	fmt.Println("----------------------------------------------------")
-	fmt.Println()
+	
+
 }

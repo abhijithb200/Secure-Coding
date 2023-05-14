@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -25,8 +24,8 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func FileCreate(src []byte) {
-	// src := r.text
+func (r RabbitConn)  FileCreate() {
+	src := r.text
 
 	var b bytes.Buffer
 
@@ -41,7 +40,7 @@ func FileCreate(src []byte) {
 	rootNode := par.GetRootNode()
 	rootNode.Walk(&visitor)
 
-	f, err := os.Create("../parser/example.go")
+	f, err := os.Create("./parser/example.go")
 	if err != nil {
 		panic(err)
 	}
@@ -70,62 +69,58 @@ func FileCreate(src []byte) {
 
 }
 
-// func (r *RabbitConn) ReceiveFrom() {
-// 	ch, err := r.conn.Channel()
-// 	failOnError(err, "Failed to open a channel")
-// 	defer ch.Close()
+func (r *RabbitConn) ReceiveFrom() {
+	ch, err := r.conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
 
-// 	q, err := ch.QueueDeclare(
-// 		"one", // name
-// 		false, // durable
-// 		false, // delete when unused
-// 		false, // exclusive
-// 		false, // no-wait
-// 		nil,   // arguments
-// 	)
-// 	failOnError(err, "Failed to declare a queue")
+	q, err := ch.QueueDeclare(
+		"one", // name
+		false, // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
 
-// 	msgs, err := ch.Consume(
-// 		q.Name, // queue
-// 		"",     // consumer
-// 		true,   // auto-ack
-// 		false,  // exclusive
-// 		false,  // no-local
-// 		false,  // no-wait
-// 		nil,    // args
-// 	)
-// 	failOnError(err, "Failed to register a consumer")
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	failOnError(err, "Failed to register a consumer")
 
-// 	var forever chan struct{}
+	var forever chan struct{}
 
-// 	go func() {
-// 		for d := range msgs {
-// 			log.Printf("Received a message: %s", d.Body)
-// 			r.text = d.Body
-// 			r.FileCreate()
-// 		}
-// 	}()
+	go func() {
+		for d := range msgs {
+			log.Printf("Received a message: %s", d.Body)
+			r.text = d.Body
+			r.FileCreate()
+		}
+	}()
 
-// 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-// 	<-forever
-// }
+	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	<-forever
+}
 
 func main() {
-	// con, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	// failOnError(err, "Failed to connect to RabbitMQ")
-	// defer con.Close()
+	con, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer con.Close()
 
-	// d := RabbitConn{
-	// 	conn: con,
-	// }
-	// d.ReceiveFrom()
+	d := RabbitConn{
+		conn: con,
+	}
+	d.ReceiveFrom()
 
-	// src := []byte(`<?php
-	// <?php
-	// $a = $_GET['name'];
-	// echo "Name is".$a;
-	// `)
+	
 
-	src, _ := ioutil.ReadFile("index.php")
-	FileCreate(src)
+	// src, _ := ioutil.ReadFile("index.php")
+	// FileCreate(src)
 }

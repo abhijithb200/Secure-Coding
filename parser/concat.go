@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -51,7 +50,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 					spec:  b.(ArrayDimFetchNew),
 				}
 
-				fmt.Println(VulnTracker.taintvar)
+				
 			}
 		}
 

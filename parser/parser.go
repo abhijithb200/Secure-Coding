@@ -2,7 +2,6 @@ package parser
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -37,6 +36,7 @@ var CSRFlist []string
 
 type FinalReport struct {
 	Hash string 	`json:"hash"`
+	Everything string `json:"everything"`
 	Vulns []Report	`json:"vulns"`
 }
 
@@ -62,25 +62,20 @@ func Parser(hash string) {
 
 	}
 
-	b := FinalReport{
-		Hash: hash,
-		Vulns: VulnStore,
-	}
-	p,_ := json.Marshal(b)
-	fmt.Println(string(p))
+	
 
-	f, err := os.Create("../source/Codeguardian.json")
-	if err != nil {
-		panic(err)
-	}
+	// f, err := os.Create("../source/Codeguardian.json")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	defer f.Close()
+	// defer f.Close()
 
-	// Write the package declaration to the file
-	_, err = fmt.Fprintf(f, string(p))
-	if err != nil {
-		panic(err)
-	}
+	// // Write the package declaration to the file
+	// _, err = fmt.Fprintf(f, string(p))
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 
 
@@ -97,4 +92,13 @@ func Parser(hash string) {
 			},
 		)
 	}
+
+	b := FinalReport{
+		Hash: hash,
+		Everything: VulnOutput,
+		Vulns: VulnStore,
+	}
+	p,_ := json.Marshal(b)
+	os.Stdout.Write(p)
+	VulnOutput = ""
 }
