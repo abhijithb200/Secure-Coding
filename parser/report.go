@@ -27,7 +27,7 @@ func VulnSourceResolve(a TaintSpec) {
 	for k, v := range VulnTracker.taintvar {
 		if k == a.alias {
 			if v.spec != nil {
-				VulnOutput+= fmt.Sprintln("Vulnerable Source :", v.spec)
+				VulnOutput += fmt.Sprintln("Vulnerable Source :", v.spec)
 				z = v.spec
 				return
 			} else {
@@ -42,7 +42,7 @@ func VarSourceResolve(a TaintSpec) {
 	for k, v := range VulnTracker.allvar {
 		if k == a.alias {
 			if v.spec != nil {
-				VulnOutput+= fmt.Sprintln("Vulnerable Source :", v.spec)
+				VulnOutput += fmt.Sprintln("Vulnerable Source :", v.spec)
 				return
 			} else {
 				VulnSourceResolve(v)
@@ -54,9 +54,9 @@ func VarSourceResolve(a TaintSpec) {
 
 func vuln_reporter(a *VulnReport) {
 	VulnOutput += "----------------------------------------------------------\n"
-	VulnOutput +=  fmt.Sprintln("[!]Vulnerability Found on line ", a.position.StartLine)
-	VulnOutput+= fmt.Sprintln("Type :", a.name)
-	VulnOutput+= fmt.Sprintln("Description :", a.message)
+	VulnOutput += fmt.Sprintln("[!]Vulnerability Found on line ", a.position.StartLine)
+	VulnOutput += fmt.Sprintln("Type :", a.name)
+	VulnOutput += fmt.Sprintln("Description :", a.message)
 
 	switch a.some.(type) {
 
@@ -68,10 +68,10 @@ func vuln_reporter(a *VulnReport) {
 	// if the vuln source is directly in the echo
 	case ArrayDimFetchNew:
 		z = a.some
-		VulnOutput+= fmt.Sprintln("Vulnerable Source :", a.some)
+		VulnOutput += fmt.Sprintln("Vulnerable Source :", a.some)
 	}
 
-	if a.name == "Reflected XSS" {
+	if a.name == "Reflected XSS" || a.name == "SQL Injection" {
 		v := Report{
 			Type: a.name,
 			Source: XSSReport{
@@ -80,11 +80,9 @@ func vuln_reporter(a *VulnReport) {
 			},
 		}
 		VulnStore = append(VulnStore, v)
-
 	}
 
 	// nullify the global variable
 	z = 0
-	
 
 }

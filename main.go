@@ -36,6 +36,7 @@ func FindHash() string {
 var requestChannel chan []byte
 
 var counter int = 0
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
@@ -46,23 +47,20 @@ type RabbitConn struct {
 	conn *amqp.Connection
 }
 
-
-
-
-func AllGroceries(d RabbitConn) func (w http.ResponseWriter, r *http.Request) {
+func AllGroceries(d RabbitConn) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		d.sendTo()
 
 		var data parser.FinalReport
 
 		fmt.Println("working")
-		msg := <- requestChannel
-		json.Unmarshal(msg,&data)
+		msg := <-requestChannel
+		json.Unmarshal(msg, &data)
 		fmt.Println(data)
 		json.NewEncoder(w).Encode(data)
-        
-    }
-	
+
+	}
+
 }
 
 func (r RabbitConn) sendTo() {
@@ -109,15 +107,14 @@ func main() {
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer con.Close()
 
-	requestChannel = make(chan []byte) 
+	requestChannel = make(chan []byte)
 
 	d := RabbitConn{
 		conn: con,
 	}
-	
 
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/allgroceries", AllGroceries(d))
+	r.HandleFunc("/analyze", AllGroceries(d))
 
 	// <-- Need to run as separate process -->
 	// fileName := "./layer1/file_create.go"
@@ -162,8 +159,8 @@ func main() {
 							continue
 						}
 
-						requestChannel <-output
-						
+						requestChannel <- output
+
 					}
 
 				}
