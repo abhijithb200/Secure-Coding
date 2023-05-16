@@ -93,6 +93,9 @@ func Parser(hash string) {
 		)
 	}
 
+	// fmt.Println(VulnTracker.taintvar)
+	// fmt.Println(VulnTracker.allvar)
+
 	b := FinalReport{
 		Hash: hash,
 		Everything: VulnOutput,
@@ -100,5 +103,6 @@ func Parser(hash string) {
 	}
 	p,_ := json.Marshal(b)
 	os.Stdout.Write(p)
+	// fmt.Println(b.Everything)
 	VulnOutput = ""
 }

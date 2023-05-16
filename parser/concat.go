@@ -70,7 +70,6 @@ func (c *Concat) Out(argstore ArgStore) Values {
 			}
 
 		} else if reflect.TypeOf(b).String() == "parser.IdentifierNew" {
-
 			for k, _ := range VulnTracker.taintvar {
 
 				// if expression contain tainted value, set the spec of current variable to it

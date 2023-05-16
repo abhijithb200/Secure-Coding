@@ -53,6 +53,7 @@ func VarSourceResolve(a TaintSpec) {
 }
 
 func vuln_reporter(a *VulnReport) {
+	VulnOutput += "----------------------------------------------------------\n"
 	VulnOutput +=  fmt.Sprintln("[!]Vulnerability Found on line ", a.position.StartLine)
 	VulnOutput+= fmt.Sprintln("Type :", a.name)
 	VulnOutput+= fmt.Sprintln("Description :", a.message)

@@ -105,8 +105,32 @@ type ArgumentList struct {
 }
 
 func (f *ArgumentList) Out(argstore ArgStore) Values {
-	for i, r := range f.Arguments {
 
+	
+	if argstore.variable == "mysqli_connect"{
+		// check for third argument(password for connection) is in allvar[] or not
+		if _,ok := VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok{
+			vuln_reporter(&VulnReport{
+				name:    "Hardcoded Credentials",
+				message: "Found " + f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_connect",
+				some:    VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)],
+				// position: *c.Position,
+			})
+		}
+	}
+
+	if argstore.variable == "mysqli_query"{
+		if _,ok := VulnTracker.taintvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok{
+			vuln_reporter(&VulnReport{
+				name:    "SQL Injection",
+				message: "Found " + f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_query",
+				some:    VulnTracker.taintvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)],
+				// position: *c.Position,
+			})
+		}
+	}
+
+	for i, r := range f.Arguments {
 		// if tainted value is in the argument
 		if _, ok := VulnTracker.taintvar[r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
 			CurrFuncStatus["po"] = append(CurrFuncStatus["po"], struct {
@@ -120,20 +144,7 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 			return r
 		}
 	}
-
-	if argstore.variable == "mysqli_connect"{
-
-		// check for third argument(password for connection) is in allvar[] or not
-		if _,ok := VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok{
-			vuln_reporter(&VulnReport{
-				name:    "Hardcoded Credentials",
-				message: "Found " + f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_connect",
-				some:    VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)],
-				// position: *c.Position,
-			})
-		}
-
-	}
+	
 
 	return nil
 }

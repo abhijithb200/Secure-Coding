@@ -84,9 +84,9 @@ func (r RabbitConn) sendTo() {
 	defer cancel()
 
 	src := []byte(`<?php
-	<?php
-	$a = $_GET['name'];
-	echo "Name is".$a;
+$username = $_POST['username'];
+$sql = "SELECT * FROM users WHERE username = {$username}";
+$result = mysqli_query($conn, $sql);
 	`)
 
 	err = ch.PublishWithContext(ctx,

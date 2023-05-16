@@ -9,30 +9,77 @@ func Test() program {
 			Expr: &Assign{
 				Variable: &Variable{
 					VarName: &Identifier{
-						Value: "a",
+						Value: "username",
 					},
 				},
 				Expression: &ArrayDimFetch{
 					Variable: &Variable{
 						VarName: &Identifier{
-							Value: "_GET",
+							Value: "_POST",
 						},
 					},
 					Dim: &String{
-						Value: "'name'",
+						Value: "'username'",
 					},
 				},
 			},
 		},
-		&Echo{
-			Exprs: []Node{
-				&Concat{
-					Left: &String{
-						Value: "\"Name is\"",
+		&Expression{
+			Expr: &Assign{
+				Variable: &Variable{
+					VarName: &Identifier{
+						Value: "sql",
 					},
-					Right: &Variable{
-						VarName: &Identifier{
-							Value: "a",
+				},
+				Expression: &Encapsed{
+					Parts: []Node{
+						&EncapsedStringPart{
+							Value: "SELECT * FROM users WHERE username = ",
+						},
+						&Variable{
+							VarName: &Identifier{
+								Value: "username",
+							},
+						},
+					},
+				},
+			},
+		},
+		&Expression{
+			Expr: &Assign{
+				Variable: &Variable{
+					VarName: &Identifier{
+						Value: "result",
+					},
+				},
+				Expression: &FunctionCall{
+					Function: &Name{
+						Parts: []Node{
+							&NamePart{
+								Value: "mysqli_query",
+							},
+						},
+					},
+					ArgumentList: &ArgumentList{
+						Arguments: []Node{
+							&Argument{
+								Variadic: false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "conn",
+									},
+								},
+							},
+							&Argument{
+								Variadic: false,
+								IsReference: false,
+								Expr: &Variable{
+									VarName: &Identifier{
+										Value: "sql",
+									},
+								},
+							},
 						},
 					},
 				},
