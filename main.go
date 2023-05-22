@@ -82,9 +82,31 @@ func (r RabbitConn) sendTo() {
 	defer cancel()
 
 	src := []byte(`<?php
-$username = $_POST['username'];
-$sql = "SELECT * FROM users WHERE username = {$username}";
-$result = mysqli_query($conn, $sql);
+	$host = "localhost";
+	$username  = "db_user";
+	$passwd = ".mypwd";
+	$dbname = "my_db";
+ 
+	//Creating a connection
+	$con = mysqli_connect($host, $username, $passwd, $dbname,"3307");
+ 
+	if($con){
+	   print("Connection Established Successfully");
+	}else{
+	   print("Connection Failed ");
+	}
+	$sql = "SELECT name FROM user";
+ $result = mysqli_query($con,$sql);
+ if ($result->num_rows > 0) {
+  // output data of each row
+  while($row = $result->fetch_assoc()) {
+   echo $row['name']."<br>";
+  }
+ } else {
+  echo "0 results";
+ }
+ $con->close();
+ ?>
 	`)
 
 	err = ch.PublishWithContext(ctx,

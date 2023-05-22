@@ -48,3 +48,11 @@ type Argument struct {
 func (a *Argument) Out(argstore ArgStore) Values {
 	return a.Expr.Out(ArgStore{})
 }
+
+type Lnumber struct {
+	Value string
+}
+
+func (l *Lnumber) Out(argstore ArgStore) Values {
+	return l.Value
+}

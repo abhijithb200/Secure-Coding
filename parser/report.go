@@ -11,6 +11,12 @@ type XSSReport struct {
 	Variable string `json:"variable"`
 }
 
+type SQLReport struct {
+	Value     string `json:"value"`
+	Variable  string `json:"variable"`
+	TableName string `json:"tablename"`
+}
+
 type Report struct {
 	Type   string   `json:"type"`
 	Source AllVulns `json:"source"`

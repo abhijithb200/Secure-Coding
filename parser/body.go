@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 )
 
 type Values interface {
@@ -106,10 +108,9 @@ type ArgumentList struct {
 
 func (f *ArgumentList) Out(argstore ArgStore) Values {
 
-	
-	if argstore.variable == "mysqli_connect"{
+	if argstore.variable == "mysqli_connect" {
 		// check for third argument(password for connection) is in allvar[] or not
-		if _,ok := VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok{
+		if _, ok := VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
 			vuln_reporter(&VulnReport{
 				name:    "Hardcoded Credentials",
 				message: "Found " + f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_connect",
@@ -119,14 +120,25 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 		}
 	}
 
-	if argstore.variable == "mysqli_query"{
-		if _,ok := VulnTracker.taintvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok{
+	if argstore.variable == "mysqli_query" {
+		if _, ok := VulnTracker.taintvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
+
 			vuln_reporter(&VulnReport{
 				name:    "SQL Injection",
 				message: "Found " + f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_query",
 				some:    VulnTracker.taintvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)],
 				// position: *c.Position,
 			})
+		}
+		if _, ok := VulnTracker.allvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
+
+			sql := VulnTracker.allvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)].spec.(string)
+			words := strings.Fields(sql)
+			fmt.Println(words[1:3])
+			for _, r := range words {
+				fmt.Println(r, "pari")
+			}
+
 		}
 	}
 
@@ -144,7 +156,6 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 			return r
 		}
 	}
-	
 
 	return nil
 }
@@ -218,8 +229,7 @@ func (a *ArrayDimFetch) Out(argstore ArgStore) Values {
 	x := a.Variable.Out(ArgStore{})
 	y := a.Dim.Out(ArgStore{})
 
-	CSRFlist = append(CSRFlist,y.(string) )
-
+	CSRFlist = append(CSRFlist, y.(string))
 
 	if reflect.TypeOf(x).String() == "parser.IdentifierNew" {
 		return ArrayDimFetchNew{Variable: x.(IdentifierNew).Value, Value: y}
@@ -307,6 +317,7 @@ type EncapsedStringPart struct {
 }
 
 func (e *EncapsedStringPart) Out(argstore ArgStore) Values {
+	fmt.Println(e.Value)
 	return e.Value
 }
 
@@ -318,4 +329,77 @@ type InlineHtml struct {
 
 func (i *InlineHtml) Out(argstore ArgStore) Values {
 	return i.Value
+}
+
+// Others ----------------------->
+
+type If struct {
+	Cond Node
+	Stmt Node
+	Else Node
+}
+
+func (i *If) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type StmtList struct {
+	Stmts []Node
+}
+
+func (s *StmtList) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type Print struct {
+	Expr Node
+}
+
+func (p *Print) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type Else struct {
+	Stmt Node
+}
+
+func (e *Else) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type MethodCall struct {
+	Variable     Node
+	Method       Node
+	ArgumentList *ArgumentList
+}
+
+func (m *MethodCall) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type Greater struct {
+	Left  Node
+	Right Node
+}
+
+func (g *Greater) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type PropertyFetch struct {
+	Variable Node
+	Property Node
+}
+
+func (p *PropertyFetch) Out(argstore ArgStore) Values {
+	return 0
+}
+
+type While struct {
+	Cond Node
+	Stmt Node
+}
+
+func (w *While) Out(argstore ArgStore) Values {
+	return 0
 }
