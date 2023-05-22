@@ -2,8 +2,11 @@
 
 `kubectl logs  nginx-deployment-67f9d469bc-h5s56`
 
+`kubectl run -it --rm test --image=busybox --restart=Never -- sh`
+
 ### Pushing docker into dockerhub
 
 - `docker build -t codeguardian-xss .`
 - `docker image tag codeguardian-xss sherloc/codeguardian-xss:1.2`
 - `docker image push sherloc/codeguardian-xss:1.2`
+

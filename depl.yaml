@@ -41,11 +41,6 @@ spec:
         volumeMounts:
         - mountPath: "/var/www/html/"
           name: www-data
-      - name: xssattack
-        image: sherloc/codeguardian-xss:1.4
-        env:
-        - name: GITHASH
-          value: "thisisafakegithash"
       volumes:
       - name: www-data
         emptyDir: {}

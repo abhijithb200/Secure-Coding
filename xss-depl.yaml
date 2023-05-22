@@ -2,20 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: codeguardianxss-deployment
-  labels:
-    app: codeguardian
 spec:
   selector:
     matchLabels:
-      app: codeguardian
+      app: codeguardianxss
   template:
     metadata:
       labels:
-        app: codeguardian
+        app: codeguardianxss
     spec:
       containers:
       - name: xssattack
-        image: sherloc/codeguardian-xss:1.3
+        image: sherloc/codeguardian-xss:1.4
         env:
         - name: GITHASH
           value: "thisisafakegithash"

@@ -8,3 +8,6 @@ spec:
     targetPort: 80
   selector:
     app: codeguardian
+
+# accept connections on port 80 and route each connection to port 8080 of one
+# the pods matching the app=kubia label selector
