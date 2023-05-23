@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -134,11 +133,16 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 
 			sql := VulnTracker.allvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)].spec.(string)
 			words := strings.Fields(sql)
-			fmt.Println(words[1:3])
-			for _, r := range words {
-				fmt.Println(r, "pari")
-			}
+			fromIndex := 0
 
+			
+			for i, r := range words {
+				if strings.ToLower(r) == "from" {
+					fromIndex = i
+				}
+			}
+			
+			DatabaseDetails[strings.Trim(words[fromIndex+1],"\"") ] = words[1:fromIndex]
 		}
 	}
 
@@ -299,6 +303,19 @@ type Encapsed struct {
 
 func (e *Encapsed) Out(argstore ArgStore) Values {
 
+	if argstore.from == "assign" {
+		for _,i := range e.Parts {
+			switch i.(type) {
+			case *EncapsedStringPart:
+					VulnTracker.allvar[argstore.variable] = TaintSpec{
+						alias: argstore.variable,
+						spec: i.Out(ArgStore{}).(string),
+					} 
+				
+			}
+		}
+	}
+
 	for _, i := range e.Parts {
 
 		a := i.Out(ArgStore{})
@@ -317,7 +334,6 @@ type EncapsedStringPart struct {
 }
 
 func (e *EncapsedStringPart) Out(argstore ArgStore) Values {
-	fmt.Println(e.Value)
 	return e.Value
 }
 

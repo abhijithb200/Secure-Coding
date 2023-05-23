@@ -2,7 +2,6 @@ package parser
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -92,8 +91,8 @@ func Parser(hash string) {
 		)
 	}
 
-	fmt.Println(VulnTracker.allvar)
-	fmt.Println(DatabaseDetails)
+	// fmt.Println(VulnTracker.allvar)
+	// fmt.Println(DatabaseDetails)
 
 	b := FinalReport{
 		Hash:       hash,

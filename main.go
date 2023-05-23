@@ -86,16 +86,17 @@ func (r RabbitConn) sendTo() {
 	$username  = "db_user";
 	$passwd = ".mypwd";
 	$dbname = "my_db";
+	$id = $_GET["id"];
  
 	//Creating a connection
-	$con = mysqli_connect($host, $username, $passwd, $dbname,"3307");
+	$con = mysqli_connect($host, $username, $passwd, $dbname);
  
 	if($con){
 	   print("Connection Established Successfully");
 	}else{
 	   print("Connection Failed ");
 	}
-	$sql = "SELECT name FROM user";
+	$sql = "SELECT name FROM user WHERE $id";
  $result = mysqli_query($con,$sql);
  if ($result->num_rows > 0) {
   // output data of each row
@@ -204,6 +205,8 @@ func main() {
 
 	// Block main goroutine forever.
 
-	log.Fatal(http.ListenAndServe(":3000", r))
+	port := ":3000" 
+	fmt.Println("[*] Waiting for connection on ",port)
+	log.Fatal(http.ListenAndServe(port, r))
 
 }
