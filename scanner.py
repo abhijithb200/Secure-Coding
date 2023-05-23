@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions
 import json
 import json,urllib.request
 from email_send import email_sender
+import mysql.connector
 
 def get_payloads_from_vectors():
     payloads = []
@@ -32,34 +33,44 @@ def get_base_url(url):
 
 
 class Scanner:
-    def __init__(self, url):
+    def __init__(self):
         self.payloads = get_payloads_from_vectors()
-        self.url = url
-        self.codeguardianurl = "http://codeguardian-serv/PHP-demo.git"
-        self.params = self.get_params()
+        self.url = "http://localhost/dashboard/phpinfo.php"
+        self.codeguardianurl = "http://localhost/dashboard/"
+        
         self.base_url = get_base_url(self.url)
-      
+        self.source = self.set_source()
+
+    def set_source(self):
+        source = urllib.request.urlopen(self.codeguardianurl+"/Codeguardian.json").read()
+        source = json.loads(source)
+
+        return source
+
+class XSS_Scanner(Scanner):
+    def __init__(self) :
+        super().__init__()
+        self.params = self.get_params()
+        
 
     def setup_windows(self):
         query_window = self.driver.current_window_handle
         return query_window
 
     def get_params(self):
-        source = urllib.request.urlopen(self.codeguardianurl+"/Codeguardian.json").read()
-        source = json.loads(source)
         params = {}
-        for i in source["vulns"]:
+        for i in self.source["vulns"]:
             if "Reflected XSS" in  i["type"]:
                 s = i["source"]["value"]
                 a = s.replace("'","")
+                a = s.replace('"',"")
                 params[a] = ""
+        
         return params
     
     def get_hash(self):
-        source = urllib.request.urlopen(self.codeguardianurl+"/Codeguardian.json").read()
-        source = json.loads(source)
 
-        return source["hash"]
+        return self.source["hash"]
 
     def query_scanner(self, payload):
         for param in self.params.keys():
@@ -95,19 +106,105 @@ class Scanner:
                 vuln_url = self.query_scanner(payload)
                 if vuln_url:
                     print("Detected",vuln_url)
-                    email_sender(vuln_url) 
+                    # email_sender(vuln_url) 
                     break
 
         return
+    
+class SQL_Scanner(Scanner):
 
-s = Scanner("http://codeguardian-serv/PHP-demo.git/index.php")
-s.setup()
+    def __init__(self):
+        super().__init__()
+        self.params = self.get_params()
+        self.dbconn = mysql.connector.connect(host = "localhost", user = "root",passwd = "",database = "test")
+        self.tablename,self.tablefields = self.get_dbdetails()
+        self.setup()
 
-while True:
-    if os.getenv("GITHASH") != s.get_hash(): #changed
-        print("Changed")
-        os.environ["GITHASH"] = s.get_hash()
-        s.run_on_url()
-    print("Not changed")
-    time.sleep(5)
+    def checkTableExists(self):
+        dbcur = self.dbconn.cursor()
+        dbcur.execute("SHOW tables;")
+        result = dbcur.fetchall()
+        for x in result:
+            if x[0]==self.tablename:
+                return True
+        dbcur.close()
+        return False
+    
+    def checkReqFields(self):
+        dbcur = self.dbconn.cursor()
+        dbcur.execute("SHOW COLUMNS FROM persons;")
+        result = dbcur.fetchall()
+
+        fields_present = []
+        fields_not_present = []
+        for x in result:
+            fields_present.append(x[0].lower())
+
+        for i in self.tablefields:
+            if i not in fields_present:
+                fields_not_present.append(i)
+
+        dbcur.close()
+        return fields_not_present
+
+
+        
+    
+
+    def get_dbdetails(self):
+        for i in self.source["vulns"]:
+            if "SQL Injection" in  i["type"]:
+                dbdetails = i["source"]["dbdetails"]
+                for k,v in dbdetails.items():
+                    return k,[i.lower() for i in v]
+
+    def setup(self):
+        '''
+        if table exist - check is the table contain the required fields - and any data
+        if table not exist - create a table with fields and data
+        if table exist - and have required fields - add data
+        '''
+        dbcur = self.dbconn.cursor()
+        if self.checkTableExists():
+            c = self.checkReqFields()
+            if c != [] : # fields not preset in table
+                for i in c:
+                    dbcur.execute(f"ALTER TABLE persons \
+                                  ADD {i} VARCHAR(100);",)
+                    
+                query = 'INSERT INTO persons '+'(' +','.join(c)+')'+' VALUES '+ '(' +','.join([ "\""+5*"A"+"\"" for i in range(len(c))])+');'
+
+                dbcur.execute(query)
+                self.dbconn.commit()
+                dbcur.close()
+
+
+
+    def get_params(self):
+        params = {}
+        for i in self.source["vulns"]:
+            if "SQL Injection" in  i["type"]:
+                s = i["source"]["value"]
+                a = s.replace("'","")
+                a = s.replace('"',"")
+                params[a] = ""
+
+        return params
+
+# xss = XSS_Scanner()
+# xss.setup()
+# xss.run_on_url()
+
+sql = SQL_Scanner()
+sql.get_params()
+
+  
+
+# while True:
+#     if os.getenv("GITHASH") != s.get_hash(): #changed
+#         print("Changed")
+#         os.environ["GITHASH"] = s.get_hash()
+#         s.run_on_url()
+#     print("Not changed")
+#     time.sleep(5)
 

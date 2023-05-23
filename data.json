@@ -1,30 +1,14 @@
-[
-  {
-    "type": "Reflected XSS",
-    "source": {
-      "value": "name",
-      "varible": "_GET"
+{
+  "hash": "",
+  "everything": "----------------------------------------------------------\n[!]Vulnerability Found on line  0\nType : Hardcoded Credentials\nDescription : Found passwd inside mysqli_connect\nVulnerable Source : \".mypwd\"\n----------------------------------------------------------\n[!]Vulnerability Found on line  0\nType : SQL Injection\nDescription : Found sql inside mysqli_query\nVulnerable Source : {_GET \"id\"}\n----------------------------------------------------------\n[!]Vulnerability Found on line  0\nType : CSRF token missing\nDescription : \n",
+  "vulns": [
+    {
+      "type": "SQL Injection",
+      "source": {
+        "dbdetails": { "user": ["name"] },
+        "value": "\"id\"",
+        "variable": "_GET"
+      }
     }
-  },
-  {
-    "type": "Reflected XSS",
-    "source": {
-      "value": "age",
-      "varible": "_GET"
-    }
-  },
-  {
-    "type": "XSS",
-    "source": {
-      "value": "dishoo",
-      "varible": "_GET"
-    }
-  },
-  {
-    "type": "Reflected XSS",
-    "source": {
-      "value": "address",
-      "varible": "_GET"
-    }
-  }
-]
+  ]
+}
