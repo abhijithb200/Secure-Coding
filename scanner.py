@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions
 import json
 import json,urllib.request
 from email_send import email_sender
+import subprocess
 import mysql.connector
 
 def get_payloads_from_vectors():
@@ -116,6 +117,7 @@ class SQL_Scanner(Scanner):
     def __init__(self):
         super().__init__()
         self.params = self.get_params()
+        self.sqlmapPath = "C://Users//abhij//sqlmap//sqlmap.py"
         self.dbconn = mysql.connector.connect(host = "localhost", user = "root",passwd = "",database = "test")
         self.tablename,self.tablefields = self.get_dbdetails()
         self.setup()
@@ -168,8 +170,9 @@ class SQL_Scanner(Scanner):
         if self.checkTableExists():
             c = self.checkReqFields()
             if c != [] : # fields not preset in table
+                
                 for i in c:
-                    dbcur.execute(f"ALTER TABLE persons \
+                    dbcur.execute(f"ALTER TABLE {self.tablename} \
                                   ADD {i} VARCHAR(100);",)
                     
                 query = 'INSERT INTO persons '+'(' +','.join(c)+')'+' VALUES '+ '(' +','.join([ "\""+5*"A"+"\"" for i in range(len(c))])+');'
@@ -177,8 +180,30 @@ class SQL_Scanner(Scanner):
                 dbcur.execute(query)
                 self.dbconn.commit()
                 dbcur.close()
+                print("Added fields")
+        else:   #if table not present
+            query = f'CREATE TABLE {self.tablename} ' + ' (' + ' VARCHAR(255), '.join(self.tablefields) + " VARCHAR(255));"
+            dbcur.execute(query)
+
+            query = f'INSERT INTO {self.tablename} '+'(' +','.join(self.tablefields)+')'+' VALUES '+ '(' +','.join([ "\""+5*"A"+"\"" for i in range(len(self.tablefields))])+');'
+            print(query)
+            dbcur.execute(query)
+            self.dbconn.commit()
+            print("Table created")
+            dbcur.close()
 
 
+    def run_on_url(self):
+        sqlmap_cmd = ["python",self.sqlmapPath, "-u", "http://localhost/test/sql.php?id=2", "-p", "id", "--batch","--flush-session"]
+        result = subprocess.run(sqlmap_cmd, capture_output=True, text=True)
+        output = result.stdout.strip()
+        if "does not seem to be injectable" not in output:
+            print("Vulnerability found",output)
+        else:
+            print("No vulnerability")
+
+
+        pass
 
     def get_params(self):
         params = {}
@@ -196,7 +221,7 @@ class SQL_Scanner(Scanner):
 # xss.run_on_url()
 
 sql = SQL_Scanner()
-sql.get_params()
+sql.run_on_url()
 
   
 
