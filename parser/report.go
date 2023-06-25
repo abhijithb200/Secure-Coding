@@ -19,6 +19,8 @@ type SQLReport struct {
 
 type Report struct {
 	Type   string   `json:"type"`
+	Description   string   `json:"discription"`
+	Position int `json:"position"`
 	Source AllVulns `json:"source"`
 }
 
@@ -80,6 +82,8 @@ func vuln_reporter(a *VulnReport) {
 	if a.name == "Reflected XSS" {
 		v := Report{
 			Type: a.name,
+			Description: a.message,
+			Position: a.position.StartLine,
 			Source: XSSReport{
 				Value:    z.(ArrayDimFetchNew).Value.(string),
 				Variable: z.(ArrayDimFetchNew).Variable.(string),
@@ -89,6 +93,8 @@ func vuln_reporter(a *VulnReport) {
 	}else if a.name == "SQL Injection"{
 		v := Report{
 			Type: a.name,
+			Description: a.message,
+			Position: a.position.StartLine,
 			Source: SQLReport{
 				Value:    z.(ArrayDimFetchNew).Value.(string),
 				Variable: z.(ArrayDimFetchNew).Variable.(string),

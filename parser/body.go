@@ -75,6 +75,9 @@ func (p *Parameter) Out(argstore ArgStore) Values {
 }
 
 type FunctionCall struct {
+	Position *Position
+
+
 	Function     *Name
 	ArgumentList Node
 }
@@ -92,7 +95,7 @@ func (f *FunctionCall) Out(argstore ArgStore) Values {
 				name:    "OS Command Injection",
 				message: "Found " + r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside exec",
 				some:    VulnTracker.taintvar[r.(*Argument).Expr.Out(ArgStore{}).(IdentifierNew).Value.(string)],
-				// position: *c.Position,
+				position: *f.Position,
 			})
 
 		}
@@ -102,6 +105,8 @@ func (f *FunctionCall) Out(argstore ArgStore) Values {
 }
 
 type ArgumentList struct {
+	Position *Position
+
 	Arguments []Node
 }
 
@@ -114,7 +119,7 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 				name:    "Hardcoded Credentials",
 				message: "Found " + f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_connect",
 				some:    VulnTracker.allvar[f.Arguments[2].Out(ArgStore{}).(IdentifierNew).Value.(string)],
-				// position: *c.Position,
+				position: *f.Position,
 			})
 		}
 	}
@@ -126,7 +131,7 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 				name:    "SQL Injection",
 				message: "Found " + f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string) + " inside mysqli_query",
 				some:    VulnTracker.taintvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)],
-				// position: *c.Position,
+				position: *f.Position,
 			})
 		}
 		if _, ok := VulnTracker.allvar[f.Arguments[1].Out(ArgStore{}).(IdentifierNew).Value.(string)]; ok {
@@ -140,6 +145,8 @@ func (f *ArgumentList) Out(argstore ArgStore) Values {
 				if strings.ToLower(r) == "from" {
 					fromIndex = i
 				}
+
+				
 			}
 			
 			DatabaseDetails[strings.Trim(words[fromIndex+1],"\"") ] = words[1:fromIndex]
@@ -256,6 +263,8 @@ func (v *Variable) Out(argstore ArgStore) Values {
 }
 
 type Name struct {
+	Position *Position
+
 	Parts []Node
 }
 
@@ -298,6 +307,7 @@ func (i *Include) Out(argstore ArgStore) Values {
 }
 
 type Encapsed struct {
+	Position *Position
 	Parts []Node
 }
 
@@ -330,6 +340,7 @@ func (e *Encapsed) Out(argstore ArgStore) Values {
 }
 
 type EncapsedStringPart struct {
+	Position *Position
 	Value string
 }
 
@@ -350,6 +361,8 @@ func (i *InlineHtml) Out(argstore ArgStore) Values {
 // Others ----------------------->
 
 type If struct {
+	Position *Position
+
 	Cond Node
 	Stmt Node
 	Else Node
@@ -360,6 +373,7 @@ func (i *If) Out(argstore ArgStore) Values {
 }
 
 type StmtList struct {
+	Position *Position
 	Stmts []Node
 }
 
@@ -368,6 +382,7 @@ func (s *StmtList) Out(argstore ArgStore) Values {
 }
 
 type Print struct {
+	Position *Position
 	Expr Node
 }
 
@@ -376,6 +391,7 @@ func (p *Print) Out(argstore ArgStore) Values {
 }
 
 type Else struct {
+	Position *Position
 	Stmt Node
 }
 
@@ -384,6 +400,7 @@ func (e *Else) Out(argstore ArgStore) Values {
 }
 
 type MethodCall struct {
+	Position *Position
 	Variable     Node
 	Method       Node
 	ArgumentList *ArgumentList
@@ -394,6 +411,7 @@ func (m *MethodCall) Out(argstore ArgStore) Values {
 }
 
 type Greater struct {
+	Position *Position
 	Left  Node
 	Right Node
 }
@@ -403,6 +421,7 @@ func (g *Greater) Out(argstore ArgStore) Values {
 }
 
 type PropertyFetch struct {
+	Position *Position
 	Variable Node
 	Property Node
 }
@@ -412,6 +431,7 @@ func (p *PropertyFetch) Out(argstore ArgStore) Values {
 }
 
 type While struct {
+	Position *Position
 	Cond Node
 	Stmt Node
 }

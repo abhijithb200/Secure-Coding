@@ -47,23 +47,34 @@ type RabbitConn struct {
 	conn *amqp.Connection
 }
 
+type Post struct {
+	Contents string `json:"contents"`
+}
+
 func AllGroceries(d RabbitConn) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		d.sendTo()
+		
+
+		var post Post
+		_ = json.NewDecoder(r.Body).Decode(&post)
+
+		src := []byte(post.Contents)
+
+		d.sendTo(src)
 
 		var data parser.FinalReport
 
-		fmt.Println("working")
+	
 		msg := <-requestChannel
 		json.Unmarshal(msg, &data)
-		fmt.Println(data)
+		// fmt.Print(msg)
 		json.NewEncoder(w).Encode(data)
 
 	}
 
 }
 
-func (r RabbitConn) sendTo() {
+func (r RabbitConn) sendTo(src []byte) {
 
 	ch, err := r.conn.Channel()
 	failOnError(err, "Failed to open a channel")
@@ -81,34 +92,34 @@ func (r RabbitConn) sendTo() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	src := []byte(`<?php
-	$host = "localhost";
-	$username  = "db_user";
-	$passwd = ".mypwd";
-	$dbname = "my_db";
-	$id = $_GET["id"];
+// 	src := []byte(`<?php
+// 	$host = "localhost";
+// 	$username  = "db_user";
+// 	$passwd = ".mypwd";
+// 	$dbname = "my_db";
+// 	$id = $_GET["id"];
  
-	//Creating a connection
-	$con = mysqli_connect($host, $username, $passwd, $dbname);
+// 	//Creating a connection
+// 	$con = mysqli_connect($host, $username, $passwd, $dbname);
  
-	if($con){
-	   print("Connection Established Successfully");
-	}else{
-	   print("Connection Failed ");
-	}
-	$sql = "SELECT name FROM user WHERE $id";
- $result = mysqli_query($con,$sql);
- if ($result->num_rows > 0) {
-  // output data of each row
-  while($row = $result->fetch_assoc()) {
-   echo $row['name']."<br>";
-  }
- } else {
-  echo "0 results";
- }
- $con->close();
- ?>
-	`)
+// 	if($con){
+// 	   print("Connection Established Successfully");
+// 	}else{
+// 	   print("Connection Failed ");
+// 	}
+// 	$sql = "SELECT name FROM user WHERE $id";
+//  $result = mysqli_query($con,$sql);
+//  if ($result->num_rows > 0) {
+//   // output data of each row
+//   while($row = $result->fetch_assoc()) {
+//    echo $row['name']."<br>";
+//   }
+//  } else {
+//   echo "0 results";
+//  }
+//  $con->close();
+//  ?>
+// 	`)
 
 	err = ch.PublishWithContext(ctx,
 		"",     // exchange
@@ -120,7 +131,7 @@ func (r RabbitConn) sendTo() {
 			Body:        src,
 		})
 	failOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", src)
+	
 
 }
 
@@ -172,13 +183,14 @@ func main() {
 				if event.Has(fsnotify.Write) && event.Name == "parser\\example.go" {
 
 					// the file is changed - because it call two time - restrict to one
-					fmt.Println("changed")
+					
 					if counter%2 == 0 {
 						fileName := "./layer2/diffmain.go"
 						cmd := exec.Command("go", "run", fileName)
 						output, err := cmd.CombinedOutput()
 						if err != nil {
 							fmt.Println("Error:", err)
+							requestChannel <- []byte(err.Error())
 							continue
 						}
 

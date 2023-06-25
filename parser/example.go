@@ -4,318 +4,134 @@ type program *Root
 
 func Test() program {
     p:= &Root{
+	Position: &Position{
+		StartLine: 2,
+		EndLine: 4,
+		StartPos: 7,
+		EndPos: 75,
+	},
 	Stmts: []Node{
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "host",
-					},
-				},
-				Expression: &String{
-					Value: "\"localhost\"",
-				},
+		&Echo{
+			Position: &Position{
+				StartLine: 2,
+				EndLine: 2,
+				StartPos: 7,
+				EndPos: 38,
 			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "username",
+			Exprs: []Node{
+				&Concat{
+					Position: &Position{
+						StartLine: 2,
+						EndLine: 2,
+						StartPos: 12,
+						EndPos: 37,
 					},
-				},
-				Expression: &String{
-					Value: "\"db_user\"",
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "passwd",
-					},
-				},
-				Expression: &String{
-					Value: "\".mypwd\"",
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "dbname",
-					},
-				},
-				Expression: &String{
-					Value: "\"my_db\"",
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "id",
-					},
-				},
-				Expression: &ArrayDimFetch{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "_GET",
+					Left: &String{
+						Position: &Position{
+							StartLine: 2,
+							EndLine: 2,
+							StartPos: 12,
+							EndPos: 23,
 						},
+						Value: "\"Name is :\"",
 					},
-					Dim: &String{
-						Value: "\"id\"",
-					},
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "con",
-					},
-				},
-				Expression: &FunctionCall{
-					Function: &Name{
-						Parts: []Node{
-							&NamePart{
-								Value: "mysqli_connect",
-							},
+					Right: &ArrayDimFetch{
+						Position: &Position{
+							StartLine: 2,
+							EndLine: 2,
+							StartPos: 24,
+							EndPos: 37,
 						},
-					},
-					ArgumentList: &ArgumentList{
-						Arguments: []Node{
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "host",
-									},
-								},
+						Variable: &Variable{
+							Position: &Position{
+								StartLine: 2,
+								EndLine: 2,
+								StartPos: 24,
+								EndPos: 29,
 							},
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "username",
-									},
-								},
-							},
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "passwd",
-									},
-								},
-							},
-							&Argument{
-								IsReference: false,
-								Variadic: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "dbname",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		&If{
-			Cond: &Variable{
-				VarName: &Identifier{
-					Value: "con",
-				},
-			},
-			Stmt: &StmtList{
-				Stmts: []Node{
-					&Expression{
-						Expr: &Print{
-							Expr: &String{
-								Value: "\"Connection Established Successfully\"",
-							},
-						},
-					},
-				},
-			},
-			Else: &Else{
-				Stmt: &StmtList{
-					Stmts: []Node{
-						&Expression{
-							Expr: &Print{
-								Expr: &String{
-									Value: "\"Connection Failed \"",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "sql",
-					},
-				},
-				Expression: &Encapsed{
-					Parts: []Node{
-						&EncapsedStringPart{
-							Value: "SELECT name FROM user WHERE ",
-						},
-						&Variable{
 							VarName: &Identifier{
-								Value: "id",
+								Position: &Position{
+									StartLine: 2,
+									EndLine: 2,
+									StartPos: 24,
+									EndPos: 29,
+								},
+								Value: "_GET",
 							},
+						},
+						Dim: &String{
+							Position: &Position{
+								StartLine: 2,
+								EndLine: 2,
+								StartPos: 30,
+								EndPos: 36,
+							},
+							Value: "'name'",
 						},
 					},
 				},
 			},
 		},
-		&Expression{
-			Expr: &Assign{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "result",
+		&Echo{
+			Position: &Position{
+				StartLine: 3,
+				EndLine: 4,
+				StartPos: 40,
+				EndPos: 75,
+			},
+			Exprs: []Node{
+				&Concat{
+					Position: &Position{
+						StartLine: 3,
+						EndLine: 3,
+						StartPos: 45,
+						EndPos: 70,
 					},
-				},
-				Expression: &FunctionCall{
-					Function: &Name{
-						Parts: []Node{
-							&NamePart{
-								Value: "mysqli_query",
+					Left: &String{
+						Position: &Position{
+							StartLine: 3,
+							EndLine: 3,
+							StartPos: 45,
+							EndPos: 56,
+						},
+						Value: "\"Name is :\"",
+					},
+					Right: &ArrayDimFetch{
+						Position: &Position{
+							StartLine: 3,
+							EndLine: 3,
+							StartPos: 57,
+							EndPos: 70,
+						},
+						Variable: &Variable{
+							Position: &Position{
+								StartLine: 3,
+								EndLine: 3,
+								StartPos: 57,
+								EndPos: 62,
+							},
+							VarName: &Identifier{
+								Position: &Position{
+									StartLine: 3,
+									EndLine: 3,
+									StartPos: 57,
+									EndPos: 62,
+								},
+								Value: "_GET",
 							},
 						},
-					},
-					ArgumentList: &ArgumentList{
-						Arguments: []Node{
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "con",
-									},
-								},
+						Dim: &String{
+							Position: &Position{
+								StartLine: 3,
+								EndLine: 3,
+								StartPos: 63,
+								EndPos: 69,
 							},
-							&Argument{
-								Variadic: false,
-								IsReference: false,
-								Expr: &Variable{
-									VarName: &Identifier{
-										Value: "sql",
-									},
-								},
-							},
+							Value: "'name'",
 						},
 					},
 				},
 			},
-		},
-		&If{
-			Cond: &Greater{
-				Left: &PropertyFetch{
-					Variable: &Variable{
-						VarName: &Identifier{
-							Value: "result",
-						},
-					},
-					Property: &Identifier{
-						Value: "num_rows",
-					},
-				},
-				Right: &Lnumber{
-					Value: "0",
-				},
-			},
-			Stmt: &StmtList{
-				Stmts: []Node{
-					&While{
-						Cond: &Assign{
-							Variable: &Variable{
-								VarName: &Identifier{
-									Value: "row",
-								},
-							},
-							Expression: &MethodCall{
-								Variable: &Variable{
-									VarName: &Identifier{
-										Value: "result",
-									},
-								},
-								Method: &Identifier{
-									Value: "fetch_assoc",
-								},
-								ArgumentList: &ArgumentList{
-								},
-							},
-						},
-						Stmt: &StmtList{
-							Stmts: []Node{
-								&Echo{
-									Exprs: []Node{
-										&Concat{
-											Left: &ArrayDimFetch{
-												Variable: &Variable{
-													VarName: &Identifier{
-														Value: "row",
-													},
-												},
-												Dim: &String{
-													Value: "'name'",
-												},
-											},
-											Right: &String{
-												Value: "\"<br>\"",
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			Else: &Else{
-				Stmt: &StmtList{
-					Stmts: []Node{
-						&Echo{
-							Exprs: []Node{
-								&String{
-									Value: "\"0 results\"",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		&Expression{
-			Expr: &MethodCall{
-				Variable: &Variable{
-					VarName: &Identifier{
-						Value: "con",
-					},
-				},
-				Method: &Identifier{
-					Value: "close",
-				},
-				ArgumentList: &ArgumentList{
-				},
-			},
-		},
-		&InlineHtml{
-			Value: "\t",
 		},
 	},
 }

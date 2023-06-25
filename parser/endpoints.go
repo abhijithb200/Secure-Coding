@@ -32,6 +32,8 @@ func (i *Identifier) Out(argstore ArgStore) Values {
 }
 
 type NamePart struct {
+	Position *Position
+
 	Value string
 }
 
@@ -40,6 +42,9 @@ func (n *NamePart) Out(argstore ArgStore) Values {
 }
 
 type Argument struct {
+	Position *Position
+
+
 	Variadic    bool
 	IsReference bool
 	Expr        Node
@@ -50,6 +55,7 @@ func (a *Argument) Out(argstore ArgStore) Values {
 }
 
 type Lnumber struct {
+	Position *Position
 	Value string
 }
 

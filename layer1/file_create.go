@@ -118,9 +118,7 @@ func main() {
 		conn: con,
 	}
 	d.ReceiveFrom()
-
 	
-
 	// src, _ := ioutil.ReadFile("index.php")
 	// FileCreate(src)
 }

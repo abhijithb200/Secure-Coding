@@ -94,7 +94,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 					name:    "Reflected XSS",
 					message: "Found " + x.(string) + " inside echo with the parameter : " + a.(ArrayDimFetchNew).Value.(string),
 					some:    a,
-					// position: *c.Position,
+					position: *c.Position,
 				})
 
 			}
@@ -104,7 +104,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 					name:    "Reflected XSS",
 					message: "Found " + y.(string) + " inside echo with the parameter : " + b.(ArrayDimFetchNew).Value.(string),
 					some:    b,
-					// position: *c.Position,
+					position: *c.Position,
 				})
 
 			}
@@ -126,7 +126,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 						name:    "Reflected XSS",
 						message: "Found Tainted value " + x.(string) + " inside echo",
 						some:    v,
-						// position: *c.Position,
+						position: *c.Position,
 					})
 				}
 
@@ -141,7 +141,7 @@ func (c *Concat) Out(argstore ArgStore) Values {
 						name:    "Reflected XSS",
 						message: "Found Tainted value  inside echo",
 						some:    v,
-						// position: *c.Position,
+						position: *c.Position,
 					})
 				}
 			}
