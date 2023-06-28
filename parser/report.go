@@ -22,6 +22,7 @@ type Report struct {
 	Description   string   `json:"discription"`
 	Position int `json:"position"`
 	Source AllVulns `json:"source"`
+	Severity int `json:"severity"`
 }
 
 var VulnStore []Report
@@ -84,6 +85,7 @@ func vuln_reporter(a *VulnReport) {
 			Type: a.name,
 			Description: a.message,
 			Position: a.position.StartLine,
+			Severity: 1,
 			Source: XSSReport{
 				Value:    z.(ArrayDimFetchNew).Value.(string),
 				Variable: z.(ArrayDimFetchNew).Variable.(string),
@@ -94,12 +96,21 @@ func vuln_reporter(a *VulnReport) {
 		v := Report{
 			Type: a.name,
 			Description: a.message,
+			Severity: 1,
 			Position: a.position.StartLine,
 			Source: SQLReport{
 				Value:    z.(ArrayDimFetchNew).Value.(string),
 				Variable: z.(ArrayDimFetchNew).Variable.(string),
 				Dbdetails: DatabaseDetails,
 			},
+		}
+		VulnStore = append(VulnStore, v)
+	}else if a.name == "CSRF token missing"{
+		v := Report{
+			Type: a.name,
+			Severity: 3,
+			Description: "",
+			Position: 1,
 		}
 		VulnStore = append(VulnStore, v)
 	}

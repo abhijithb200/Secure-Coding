@@ -6,128 +6,184 @@ func Test() program {
     p:= &Root{
 	Position: &Position{
 		StartLine: 2,
-		EndLine: 4,
+		EndLine: 5,
 		StartPos: 7,
-		EndPos: 75,
+		EndPos: 62,
 	},
 	Stmts: []Node{
-		&Echo{
+		&Expression{
 			Position: &Position{
 				StartLine: 2,
 				EndLine: 2,
 				StartPos: 7,
-				EndPos: 38,
+				EndPos: 24,
 			},
-			Exprs: []Node{
-				&Concat{
+			Expr: &Assign{
+				Position: &Position{
+					StartLine: 2,
+					EndLine: 2,
+					StartPos: 7,
+					EndPos: 23,
+				},
+				Variable: &Variable{
 					Position: &Position{
 						StartLine: 2,
 						EndLine: 2,
-						StartPos: 12,
-						EndPos: 37,
+						StartPos: 7,
+						EndPos: 9,
 					},
-					Left: &String{
+					VarName: &Identifier{
 						Position: &Position{
 							StartLine: 2,
 							EndLine: 2,
-							StartPos: 12,
-							EndPos: 23,
+							StartPos: 7,
+							EndPos: 9,
 						},
-						Value: "\"Name is :\"",
+						Value: "m",
 					},
-					Right: &ArrayDimFetch{
+				},
+				Expression: &ArrayDimFetch{
+					Position: &Position{
+						StartLine: 2,
+						EndLine: 2,
+						StartPos: 10,
+						EndPos: 23,
+					},
+					Variable: &Variable{
 						Position: &Position{
 							StartLine: 2,
 							EndLine: 2,
-							StartPos: 24,
-							EndPos: 37,
+							StartPos: 10,
+							EndPos: 15,
 						},
-						Variable: &Variable{
+						VarName: &Identifier{
 							Position: &Position{
 								StartLine: 2,
 								EndLine: 2,
-								StartPos: 24,
-								EndPos: 29,
+								StartPos: 10,
+								EndPos: 15,
 							},
-							VarName: &Identifier{
-								Position: &Position{
-									StartLine: 2,
-									EndLine: 2,
-									StartPos: 24,
-									EndPos: 29,
-								},
-								Value: "_GET",
-							},
+							Value: "_GET",
 						},
-						Dim: &String{
+					},
+					Dim: &String{
+						Position: &Position{
+							StartLine: 2,
+							EndLine: 2,
+							StartPos: 16,
+							EndPos: 22,
+						},
+						Value: "'Nice'",
+					},
+				},
+			},
+		},
+		&Expression{
+			Position: &Position{
+				StartLine: 3,
+				EndLine: 3,
+				StartPos: 26,
+				EndPos: 43,
+			},
+			Expr: &Assign{
+				Position: &Position{
+					StartLine: 3,
+					EndLine: 3,
+					StartPos: 26,
+					EndPos: 42,
+				},
+				Variable: &Variable{
+					Position: &Position{
+						StartLine: 3,
+						EndLine: 3,
+						StartPos: 26,
+						EndPos: 28,
+					},
+					VarName: &Identifier{
+						Position: &Position{
+							StartLine: 3,
+							EndLine: 3,
+							StartPos: 26,
+							EndPos: 28,
+						},
+						Value: "c",
+					},
+				},
+				Expression: &ArrayDimFetch{
+					Position: &Position{
+						StartLine: 3,
+						EndLine: 3,
+						StartPos: 29,
+						EndPos: 42,
+					},
+					Variable: &Variable{
+						Position: &Position{
+							StartLine: 3,
+							EndLine: 3,
+							StartPos: 29,
+							EndPos: 34,
+						},
+						VarName: &Identifier{
 							Position: &Position{
-								StartLine: 2,
-								EndLine: 2,
-								StartPos: 30,
-								EndPos: 36,
+								StartLine: 3,
+								EndLine: 3,
+								StartPos: 29,
+								EndPos: 34,
 							},
-							Value: "'name'",
+							Value: "_GET",
 						},
+					},
+					Dim: &String{
+						Position: &Position{
+							StartLine: 3,
+							EndLine: 3,
+							StartPos: 35,
+							EndPos: 41,
+						},
+						Value: "'Nice'",
 					},
 				},
 			},
 		},
 		&Echo{
 			Position: &Position{
-				StartLine: 3,
-				EndLine: 4,
-				StartPos: 40,
-				EndPos: 75,
+				StartLine: 4,
+				EndLine: 5,
+				StartPos: 45,
+				EndPos: 62,
 			},
 			Exprs: []Node{
 				&Concat{
 					Position: &Position{
-						StartLine: 3,
-						EndLine: 3,
-						StartPos: 45,
-						EndPos: 70,
+						StartLine: 4,
+						EndLine: 4,
+						StartPos: 50,
+						EndPos: 57,
 					},
 					Left: &String{
 						Position: &Position{
-							StartLine: 3,
-							EndLine: 3,
-							StartPos: 45,
-							EndPos: 56,
+							StartLine: 4,
+							EndLine: 4,
+							StartPos: 50,
+							EndPos: 54,
 						},
-						Value: "\"Name is :\"",
+						Value: "\"Hi\"",
 					},
-					Right: &ArrayDimFetch{
+					Right: &Variable{
 						Position: &Position{
-							StartLine: 3,
-							EndLine: 3,
-							StartPos: 57,
-							EndPos: 70,
+							StartLine: 4,
+							EndLine: 4,
+							StartPos: 55,
+							EndPos: 57,
 						},
-						Variable: &Variable{
+						VarName: &Identifier{
 							Position: &Position{
-								StartLine: 3,
-								EndLine: 3,
-								StartPos: 57,
-								EndPos: 62,
+								StartLine: 4,
+								EndLine: 4,
+								StartPos: 55,
+								EndPos: 57,
 							},
-							VarName: &Identifier{
-								Position: &Position{
-									StartLine: 3,
-									EndLine: 3,
-									StartPos: 57,
-									EndPos: 62,
-								},
-								Value: "_GET",
-							},
-						},
-						Dim: &String{
-							Position: &Position{
-								StartLine: 3,
-								EndLine: 3,
-								StartPos: 63,
-								EndPos: 69,
-							},
-							Value: "'name'",
+							Value: "m",
 						},
 					},
 				},

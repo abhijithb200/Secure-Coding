@@ -209,8 +209,9 @@ func (ec *Echo) Out(argstore ArgStore) Values {
 				vuln_reporter(
 					&VulnReport{
 						name:    "Reflected XSS",
-						message: "Found tainted variable" + a.(IdentifierNew).Value.(string) + " directly on the echo statement",
+						message: "Found tainted variable " + a.(IdentifierNew).Value.(string) + " directly on the echo statement",
 						some:    v,
+						position: *ec.Position,
 					},
 				)
 			}
