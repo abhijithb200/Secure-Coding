@@ -84,10 +84,12 @@ $output = exec($command);
 
 ## Local File Inclusion
 
-```<?php
+```php
+<?php
    $file = $_GET['file'];
    include("pages/$file");
-?>```
+?>
+```
 
 ## Hardcoded credentials
 
