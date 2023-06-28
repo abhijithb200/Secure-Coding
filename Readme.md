@@ -82,6 +82,13 @@ $command = "ls ".$_GET['modifiers'];
 $output = exec($command);
 ```
 
+## Local File Inclusion
+
+```<?php
+   $file = $_GET['file'];
+   include("pages/$file");
+?>```
+
 ## Hardcoded credentials
 
 ```php
