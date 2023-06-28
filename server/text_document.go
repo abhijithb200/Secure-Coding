@@ -19,40 +19,52 @@ func (h *handler) handleTextDocumentDidSave(ctx context.Context, conn *jsonrpc2.
 		return nil, err
 	}
 
+	go func() {
+		src, _ := ioutil.ReadFile(documentURIToURI(params.TextDocument.URI))
+		s := string(src)
+		p := Post{
+			Contents: s,
+		}
+		v,_ := json.Marshal(p)
 	
-	src, _ := ioutil.ReadFile(documentURIToURI(params.TextDocument.URI))
-	s := string(src)
-	p := Post{
-		Contents: s,
-	}
-	v,_ := json.Marshal(p)
-
-	foo2 := FinalReport{}
+		foo2 := FinalReport{}
+		
+		getJson("http://localhost:3000/analyze", &foo2,v)
 	
-	getJson("http://localhost:3000/analyze", &foo2,v)
-
-	msg := PublishDiagnosticsParams{
-		URI: params.TextDocument.URI,
-		Diagnostics: []Diagnostic{
+		
+		var d []Diagnostic
+	
+		for _,v := range foo2.Vulns{
+			d =  append(d,
 			Diagnostic{
-				Message:  documentURIToURI(params.TextDocument.URI),
-				Code: "This is a huge problem",
-				Severity: 1,
+				Message: v.Type,
+				Code: v.Description,
+				Severity: DiagnosticSeverity(v.Severity),
 				Range: Range{
 					Start: Position{
-						Line:      10,
+						Line: v.Position-1,
 						Character: 0,
 					},
 					End: Position{
-						Line:      11,
+						Line: v.Position,
 						Character: 0,
 					},
 				},
+	
 			},
-		},
-	}
-
-	conn.Notify(ctx, "textDocument/publishDiagnostics", msg)
+			)	
+		}
+		
+	
+		msg := PublishDiagnosticsParams{
+			URI: params.TextDocument.URI,
+			Diagnostics: d,
+		}
+	
+		conn.Notify(ctx, "textDocument/publishDiagnostics", msg)
+	}()
+	
+	
 	return nil, nil
 }
 

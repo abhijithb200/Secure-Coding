@@ -23,6 +23,7 @@ type Report struct {
 	Description string   `json:"discription"`
 	Position    int      `json:"position"`
 	Source      AllVulns `json:"source"`
+	Severity int `json:"severity"`
 }
 var myClient = &http.Client{Timeout: 20 * time.Second}
 

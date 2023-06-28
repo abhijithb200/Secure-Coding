@@ -25,6 +25,14 @@ func (h *handler) handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2
 		// return h.handleTextDocumentDidOpen(ctx, conn, req)
 	case "textDocument/didSave":
 		return h.handleTextDocumentDidSave(ctx, conn, req)
+		
+	case "textDocument/definition":
+		return nil,nil
+	case "textDocument/completion":
+		return nil,nil
+	case "textDocument/hover":
+		return nil,nil
+
 	case "initialized":
 		return
 
