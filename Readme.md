@@ -101,6 +101,24 @@ $password = "password";
 // Create connection
 $conn = mysqli_connect($servername, $username, $password);
 ```
+## SQL Injection
+
+```php
+<?php
+   $id = $_GET["id"];
+   $con = mysqli_connect("localhost", "root", "", "test");
+ 	$sql = "SELECT id, fname, lname FROM persons WHERE id=$id";
+  $result = mysqli_query($con,$sql);
+  if ($result->num_rows > 0) {
+   while($row = $result->fetch_assoc()) {
+    echo $row['fname']."\n";
+   }
+  } else {
+   echo "0 results";
+  }
+  $con->close();
+?>
+```
 
 ## CSRF detection
 
